@@ -46,6 +46,7 @@ func (v *Visitor) VisitMessage(m *proto.Message) {
 
 	// create new message element
 	newm := &MessageElement{
+		Parent:   v.scope,
 		Name:     m.Name,
 		IsExtend: m.IsExtend,
 	}
@@ -76,7 +77,8 @@ func (v *Visitor) VisitService(s *proto.Service) {
 
 	// create new service element
 	news := &ServiceElement{
-		Name: s.Name,
+		Parent: v.scope,
+		Name:   s.Name,
 	}
 
 	// visit children
@@ -122,8 +124,9 @@ func (v *Visitor) VisitOption(o *proto.Option) {
 
 	if el, ok := v.scope.(iAddOption); ok {
 		el.addOptionElement(&OptionElement{
-			Name:  o.Name,
-			Value: o.Constant.Source,
+			Parent: v.scope,
+			Name:   o.Name,
+			Value:  o.Constant.Source,
 		})
 	} else {
 		v.errInvalidScope("public dependency", o.Name)
@@ -164,6 +167,7 @@ func (v *Visitor) VisitNormalField(i *proto.NormalField) {
 
 	// create field
 	newf := &FieldElement{
+		Parent:   v.scope,
 		Name:     i.Name,
 		Type:     i.Type,
 		Repeated: i.Repeated,
@@ -198,8 +202,9 @@ func (v *Visitor) VisitEnumField(i *proto.EnumField) {
 
 	// create enum constant
 	newe := &EnumConstantElement{
-		Name: i.Name,
-		Tag:  i.Integer,
+		Parent: v.scope,
+		Name:   i.Name,
+		Tag:    i.Integer,
 	}
 
 	// visit children
@@ -229,7 +234,8 @@ func (v *Visitor) VisitEnum(e *proto.Enum) {
 
 	// create enum
 	newe := &EnumElement{
-		Name: e.Name,
+		Name:   e.Name,
+		Parent: v.scope,
 	}
 
 	// visit children
@@ -265,7 +271,8 @@ func (v *Visitor) VisitOneof(o *proto.Oneof) {
 
 	// create oneof
 	newo := &OneOfElement{
-		Name: o.Name,
+		Parent: v.scope,
+		Name:   o.Name,
 	}
 
 	// visit children
@@ -295,9 +302,10 @@ func (v *Visitor) VisitOneofField(o *proto.OneOfField) {
 
 	// create field
 	newf := &FieldElement{
-		Name: o.Name,
-		Type: o.Type,
-		Tag:  o.Sequence,
+		Parent: v.scope,
+		Name:   o.Name,
+		Type:   o.Type,
+		Tag:    o.Sequence,
 	}
 
 	// visit children
@@ -328,9 +336,10 @@ func (v *Visitor) VisitReserved(r *proto.Reserved) {
 		// add to scope
 		if el, ok := v.scope.(iAddReservedRange); ok {
 			el.addReservedRangeElement(&ReservedRangeElement{
-				Start: rr.From,
-				End:   rr.To,
-				IsMax: rr.Max,
+				Parent: v.scope,
+				Start:  rr.From,
+				End:    rr.To,
+				IsMax:  rr.Max,
 			})
 		} else {
 			v.errInvalidScope("reserved range", "reserved")
@@ -354,6 +363,7 @@ func (v *Visitor) VisitRPC(r *proto.RPC) {
 
 	// create RPC
 	newr := &RPCElement{
+		Parent:          v.scope,
 		Name:            r.Name,
 		RequestType:     r.RequestType,
 		StreamsRequest:  r.StreamsRequest,
@@ -388,9 +398,11 @@ func (v *Visitor) VisitMapField(f *proto.MapField) {
 
 	// create field
 	newf := &MapFieldElement{
+		Parent: v.scope,
 		FieldElement: &FieldElement{
-			Name: f.Name,
-			Type: f.Type,
+			Parent: v.scope,
+			Name:   f.Name,
+			Type:   f.Type,
 			//Repeated: f.Repeated,
 			//Optional: f.Optional,
 			//Required: f.Required,
@@ -435,9 +447,10 @@ func (v *Visitor) VisitExtensions(e *proto.Extensions) {
 		// add to scope
 		if el, ok := v.scope.(iAddExtensions); ok {
 			el.addExtensionsElement(&ExtensionsElement{
-				Start: rr.From,
-				End:   rr.To,
-				IsMax: rr.Max,
+				Parent: v.scope,
+				Start:  rr.From,
+				End:    rr.To,
+				IsMax:  rr.Max,
 			})
 		} else {
 			v.errInvalidScope("extensions", "extension")

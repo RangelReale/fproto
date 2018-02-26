@@ -4,8 +4,9 @@ package fproto
 // the option construct in a protobuf file. Option constructs
 // exist at various levels/contexts like file, message etc.
 type OptionElement struct {
-	Name  string
-	Value string
+	Parent interface{}
+	Name   string
+	Value  string
 	//IsParenthesized bool
 }
 
@@ -13,6 +14,7 @@ type OptionElement struct {
 // the fields within an enum construct. Enum constants can
 // also have inline options specified.
 type EnumConstantElement struct {
+	Parent        interface{}
 	Name          string
 	Documentation string
 	Options       []*OptionElement
@@ -23,6 +25,7 @@ type EnumConstantElement struct {
 // the enum construct in a protobuf file. Enums are
 // defined standalone or as nested entities within messages.
 type EnumElement struct {
+	Parent        interface{}
 	Name          string
 	Documentation string
 	Options       []*OptionElement
@@ -33,6 +36,7 @@ type EnumElement struct {
 // the rpc construct in a protobuf file. RPCs are defined
 // nested within ServiceElements.
 type RPCElement struct {
+	Parent          interface{}
 	Name            string
 	Documentation   string
 	Options         []*OptionElement
@@ -46,6 +50,7 @@ type RPCElement struct {
 // the service construct in a protobuf file. Service
 // construct defines the rpcs (apis) for the service.
 type ServiceElement struct {
+	Parent        interface{}
 	Name          string
 	Documentation string
 	Options       []*OptionElement
@@ -56,6 +61,7 @@ type ServiceElement struct {
 // a field of a message, a field of a oneof element
 // or an entry in the extend declaration in a protobuf file.
 type FieldElement struct {
+	Parent        interface{}
 	Name          string
 	Documentation string
 	Options       []*OptionElement
@@ -69,6 +75,7 @@ type FieldElement struct {
 // MapFieldElement is a datastructure which models
 // a map field of a message
 type MapFieldElement struct {
+	Parent interface{}
 	*FieldElement
 	KeyType string
 }
@@ -78,6 +85,7 @@ type MapFieldElement struct {
 // oneof construct share memory, and at most one field can be
 // set at any time.
 type OneOfElement struct {
+	Parent        interface{}
 	Name          string
 	Documentation string
 	Options       []*OptionElement
@@ -92,6 +100,7 @@ type OneOfElement struct {
 // to the original message definition by defining field ranges which
 // can be used for extensions.
 type ExtensionsElement struct {
+	Parent        interface{}
 	Documentation string
 	Start         int
 	End           int
@@ -101,6 +110,7 @@ type ExtensionsElement struct {
 // ReservedRangeElement is a datastructure which models
 // a reserved construct in a protobuf message.
 type ReservedRangeElement struct {
+	Parent        interface{}
 	Documentation string
 	Start         int
 	End           int
@@ -110,6 +120,7 @@ type ReservedRangeElement struct {
 // MessageElement is a datastructure which models
 // the message construct in a protobuf file.
 type MessageElement struct {
+	Parent         interface{}
 	Name           string
 	Documentation  string
 	IsExtend       bool
