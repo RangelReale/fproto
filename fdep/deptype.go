@@ -1,7 +1,9 @@
 package fdep
 
 type DepType struct {
-	PackageName string
-	Name        string
-	Item        interface{}
+	//FilePath    string
+	//PackageName string
+	FileDep *FileDep
+	Name    string
+	Item    interface{}
 }

@@ -65,6 +65,7 @@ func (d *Dep) AddFile(currentpath string, filename string) error {
 
 	fpath := path.Join(currentpath, filepath.Base(filename))
 	d.Files[fpath] = &FileDep{
+		FilePath:  fpath,
 		Dep:       d,
 		ProtoFile: pfile,
 	}
@@ -95,7 +96,22 @@ func (d *Dep) GetType(name string) (*DepType, error) {
 }
 
 func (d *Dep) GetTypes(name string) ([]*DepType, error) {
+	return d.internalGetTypes(name, nil)
+}
+
+func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error) {
 	ret := make([]*DepType, 0)
+
+	// locate the name into the own filedep
+	if filedep != nil {
+		for _, t := range filedep.ProtoFile.FindName(name) {
+			ret = append(ret, &DepType{
+				FileDep: filedep,
+				Name:    name,
+				Item:    t,
+			})
+		}
+	}
 
 	pkgs := make(map[string]string)
 
@@ -109,17 +125,36 @@ func (d *Dep) GetTypes(name string) ([]*DepType, error) {
 	}
 
 	if len(pkgs) == 0 {
+		if len(ret) > 0 {
+			return ret, nil
+		}
+
 		return nil, fmt.Errorf("Package for type '%s' not found", name)
 	}
 
 	for sppkg, spname := range pkgs {
 		for _, f := range d.Packages[sppkg] {
-			for _, t := range d.Files[f].ProtoFile.FindName(spname) {
-				ret = append(ret, &DepType{
-					PackageName: sppkg,
-					Name:        spname,
-					Item:        t,
-				})
+			include_file := false
+
+			if filedep != nil {
+				for _, ffdep := range filedep.ProtoFile.Dependencies {
+					if ffdep == f {
+						include_file = true
+						break
+					}
+				}
+			} else {
+				include_file = true
+			}
+
+			if include_file {
+				for _, t := range d.Files[f].ProtoFile.FindName(spname) {
+					ret = append(ret, &DepType{
+						FileDep: d.Files[f],
+						Name:    spname,
+						Item:    t,
+					})
+				}
 			}
 		}
 	}
