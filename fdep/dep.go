@@ -151,6 +151,7 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 				for _, t := range d.Files[f].ProtoFile.FindName(spname) {
 					ret = append(ret, &DepType{
 						FileDep: d.Files[f],
+						Alias:   sppkg,
 						Name:    spname,
 						Item:    t,
 					})
