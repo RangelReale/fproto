@@ -7,8 +7,16 @@ import (
 	"github.com/RangelReale/fproto"
 )
 
+type FileDepType int
+
+const (
+	DepType_Own FileDepType = iota
+	DepType_Imported
+)
+
 type FileDep struct {
 	FilePath  string
+	DepType   FileDepType
 	Dep       *Dep
 	ProtoFile *fproto.ProtoFile
 }

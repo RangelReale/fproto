@@ -23,11 +23,11 @@ func NewDep() *Dep {
 	}
 }
 
-func (d *Dep) AddPath(dir string) error {
-	return d.AddPathWithRoot("", dir)
+func (d *Dep) AddPath(dir string, deptype FileDepType) error {
+	return d.AddPathWithRoot("", dir, deptype)
 }
 
-func (d *Dep) AddPathWithRoot(currentpath, dir string) error {
+func (d *Dep) AddPathWithRoot(currentpath, dir string, deptype FileDepType) error {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return err
@@ -35,10 +35,10 @@ func (d *Dep) AddPathWithRoot(currentpath, dir string) error {
 
 	for _, f := range files {
 		if f.IsDir() {
-			err = d.AddPathWithRoot(path.Join(currentpath, f.Name()), filepath.Join(dir, f.Name()))
+			err = d.AddPathWithRoot(path.Join(currentpath, f.Name()), filepath.Join(dir, f.Name()), deptype)
 		} else {
 			if filepath.Ext(f.Name()) == ".proto" {
-				err = d.AddFile(currentpath, filepath.Join(dir, f.Name()))
+				err = d.AddFile(currentpath, filepath.Join(dir, f.Name()), deptype)
 			} else {
 				err = nil
 			}
@@ -51,7 +51,7 @@ func (d *Dep) AddPathWithRoot(currentpath, dir string) error {
 	return nil
 }
 
-func (d *Dep) AddFile(currentpath string, filename string) error {
+func (d *Dep) AddFile(currentpath string, filename string, deptype FileDepType) error {
 	file, err := os.Open(filename)
 	if err != nil {
 		return fmt.Errorf("Error parsing file %s: %v", filename, err)
@@ -66,6 +66,7 @@ func (d *Dep) AddFile(currentpath string, filename string) error {
 	fpath := path.Join(currentpath, filepath.Base(filename))
 	d.Files[fpath] = &FileDep{
 		FilePath:  fpath,
+		DepType:   deptype,
 		Dep:       d,
 		ProtoFile: pfile,
 	}
