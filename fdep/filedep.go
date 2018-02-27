@@ -2,6 +2,7 @@ package fdep
 
 import (
 	"fmt"
+	"path"
 
 	"github.com/RangelReale/fproto"
 )
@@ -27,4 +28,25 @@ func (fd *FileDep) GetType(name string) (*DepType, error) {
 
 func (fd *FileDep) GetTypes(name string) ([]*DepType, error) {
 	return fd.Dep.internalGetTypes(name, fd)
+}
+
+func (fd *FileDep) IsSame(filedep *FileDep) bool {
+	if fd == filedep {
+		return true
+	}
+
+	if fd.FilePath == filedep.FilePath && fd.ProtoFile.PackageName == filedep.ProtoFile.PackageName {
+		return true
+	}
+
+	return false
+}
+
+func (fd *FileDep) GoPackage() string {
+	for _, o := range fd.ProtoFile.Options {
+		if o.Name == "go_package" {
+			return o.Value
+		}
+	}
+	return path.Dir(fd.ProtoFile.PackageName)
 }
