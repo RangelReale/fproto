@@ -6,40 +6,40 @@ import (
 	"github.com/emicklei/proto"
 )
 
-type Visitor struct {
+type visitor struct {
 	protofile *ProtoFile
 	scope     interface{}
 	err       error
 }
 
-func NewVisitor(protofile *ProtoFile) *Visitor {
-	return &Visitor{
+func newVisitor(protofile *ProtoFile) *visitor {
+	return &visitor{
 		protofile: protofile,
 		scope:     protofile,
 	}
 }
 
-func (v *Visitor) Err() error {
+func (v *visitor) Err() error {
 	return v.err
 }
 
-func (v *Visitor) errInvalidScope(item, name string) {
+func (v *visitor) errInvalidScope(item, name string) {
 	v.err = &InvalidScope{fmt.Sprint("Invalid scope for item '%s' (%s)")}
 }
 
-func (v *Visitor) visitElements(ml []proto.Visitee) {
+func (v *visitor) visitElements(ml []proto.Visitee) {
 	for _, m := range ml {
 		m.Accept(v)
 	}
 }
 
-func (v *Visitor) visitOptions(ml []*proto.Option) {
+func (v *visitor) visitOptions(ml []*proto.Option) {
 	for _, m := range ml {
 		m.Accept(v)
 	}
 }
 
-func (v *Visitor) VisitMessage(m *proto.Message) {
+func (v *visitor) VisitMessage(m *proto.Message) {
 	if v.err != nil {
 		return
 	}
@@ -52,7 +52,7 @@ func (v *Visitor) VisitMessage(m *proto.Message) {
 	}
 
 	// visit children
-	nv := &Visitor{
+	nv := &visitor{
 		protofile: &ProtoFile{},
 		scope:     newm,
 	}
@@ -70,7 +70,7 @@ func (v *Visitor) VisitMessage(m *proto.Message) {
 	}
 }
 
-func (v *Visitor) VisitService(s *proto.Service) {
+func (v *visitor) VisitService(s *proto.Service) {
 	if v.err != nil {
 		return
 	}
@@ -82,7 +82,7 @@ func (v *Visitor) VisitService(s *proto.Service) {
 	}
 
 	// visit children
-	nv := &Visitor{
+	nv := &visitor{
 		protofile: &ProtoFile{},
 		scope:     news,
 	}
@@ -101,7 +101,7 @@ func (v *Visitor) VisitService(s *proto.Service) {
 
 }
 
-func (v *Visitor) VisitSyntax(s *proto.Syntax) {
+func (v *visitor) VisitSyntax(s *proto.Syntax) {
 	if v.err != nil {
 		return
 	}
@@ -109,7 +109,7 @@ func (v *Visitor) VisitSyntax(s *proto.Syntax) {
 	v.protofile.Syntax = s.Value
 }
 
-func (v *Visitor) VisitPackage(p *proto.Package) {
+func (v *visitor) VisitPackage(p *proto.Package) {
 	if v.err != nil {
 		return
 	}
@@ -117,7 +117,7 @@ func (v *Visitor) VisitPackage(p *proto.Package) {
 	v.protofile.PackageName = p.Name
 }
 
-func (v *Visitor) VisitOption(o *proto.Option) {
+func (v *visitor) VisitOption(o *proto.Option) {
 	if v.err != nil {
 		return
 	}
@@ -134,7 +134,7 @@ func (v *Visitor) VisitOption(o *proto.Option) {
 
 }
 
-func (v *Visitor) VisitImport(i *proto.Import) {
+func (v *visitor) VisitImport(i *proto.Import) {
 	if v.err != nil {
 		return
 	}
@@ -160,7 +160,7 @@ func (v *Visitor) VisitImport(i *proto.Import) {
 	}
 }
 
-func (v *Visitor) VisitNormalField(i *proto.NormalField) {
+func (v *visitor) VisitNormalField(i *proto.NormalField) {
 	if v.err != nil {
 		return
 	}
@@ -177,7 +177,7 @@ func (v *Visitor) VisitNormalField(i *proto.NormalField) {
 	}
 
 	// visit children
-	nv := &Visitor{
+	nv := &visitor{
 		protofile: &ProtoFile{},
 		scope:     newf,
 	}
@@ -195,7 +195,7 @@ func (v *Visitor) VisitNormalField(i *proto.NormalField) {
 	}
 }
 
-func (v *Visitor) VisitEnumField(i *proto.EnumField) {
+func (v *visitor) VisitEnumField(i *proto.EnumField) {
 	if v.err != nil {
 		return
 	}
@@ -208,7 +208,7 @@ func (v *Visitor) VisitEnumField(i *proto.EnumField) {
 	}
 
 	// visit children
-	nv := &Visitor{
+	nv := &visitor{
 		protofile: &ProtoFile{},
 		scope:     newe,
 	}
@@ -227,7 +227,7 @@ func (v *Visitor) VisitEnumField(i *proto.EnumField) {
 
 }
 
-func (v *Visitor) VisitEnum(e *proto.Enum) {
+func (v *visitor) VisitEnum(e *proto.Enum) {
 	if v.err != nil {
 		return
 	}
@@ -239,7 +239,7 @@ func (v *Visitor) VisitEnum(e *proto.Enum) {
 	}
 
 	// visit children
-	nv := &Visitor{
+	nv := &visitor{
 		protofile: &ProtoFile{},
 		scope:     newe,
 	}
@@ -257,14 +257,14 @@ func (v *Visitor) VisitEnum(e *proto.Enum) {
 	}
 }
 
-func (v *Visitor) VisitComment(e *proto.Comment) {
+func (v *visitor) VisitComment(e *proto.Comment) {
 	if v.err != nil {
 		return
 	}
 
 }
 
-func (v *Visitor) VisitOneof(o *proto.Oneof) {
+func (v *visitor) VisitOneof(o *proto.Oneof) {
 	if v.err != nil {
 		return
 	}
@@ -276,7 +276,7 @@ func (v *Visitor) VisitOneof(o *proto.Oneof) {
 	}
 
 	// visit children
-	nv := &Visitor{
+	nv := &visitor{
 		protofile: &ProtoFile{},
 		scope:     newo,
 	}
@@ -295,7 +295,7 @@ func (v *Visitor) VisitOneof(o *proto.Oneof) {
 
 }
 
-func (v *Visitor) VisitOneofField(o *proto.OneOfField) {
+func (v *visitor) VisitOneofField(o *proto.OneOfField) {
 	if v.err != nil {
 		return
 	}
@@ -309,7 +309,7 @@ func (v *Visitor) VisitOneofField(o *proto.OneOfField) {
 	}
 
 	// visit children
-	nv := &Visitor{
+	nv := &visitor{
 		protofile: &ProtoFile{},
 		scope:     newf,
 	}
@@ -327,7 +327,7 @@ func (v *Visitor) VisitOneofField(o *proto.OneOfField) {
 	}
 }
 
-func (v *Visitor) VisitReserved(r *proto.Reserved) {
+func (v *visitor) VisitReserved(r *proto.Reserved) {
 	if v.err != nil {
 		return
 	}
@@ -356,7 +356,7 @@ func (v *Visitor) VisitReserved(r *proto.Reserved) {
 	}
 }
 
-func (v *Visitor) VisitRPC(r *proto.RPC) {
+func (v *visitor) VisitRPC(r *proto.RPC) {
 	if v.err != nil {
 		return
 	}
@@ -372,7 +372,7 @@ func (v *Visitor) VisitRPC(r *proto.RPC) {
 	}
 
 	// visit children
-	nv := &Visitor{
+	nv := &visitor{
 		protofile: &ProtoFile{},
 		scope:     newr,
 	}
@@ -391,7 +391,7 @@ func (v *Visitor) VisitRPC(r *proto.RPC) {
 	}
 }
 
-func (v *Visitor) VisitMapField(f *proto.MapField) {
+func (v *visitor) VisitMapField(f *proto.MapField) {
 	if v.err != nil {
 		return
 	}
@@ -412,7 +412,7 @@ func (v *Visitor) VisitMapField(f *proto.MapField) {
 	}
 
 	// visit children
-	nv := &Visitor{
+	nv := &visitor{
 		protofile: &ProtoFile{},
 		scope:     newf,
 	}
@@ -431,14 +431,14 @@ func (v *Visitor) VisitMapField(f *proto.MapField) {
 }
 
 // proto2
-func (v *Visitor) VisitGroup(g *proto.Group) {
+func (v *visitor) VisitGroup(g *proto.Group) {
 	if v.err != nil {
 		return
 	}
 
 }
 
-func (v *Visitor) VisitExtensions(e *proto.Extensions) {
+func (v *visitor) VisitExtensions(e *proto.Extensions) {
 	if v.err != nil {
 		return
 	}

@@ -15,7 +15,7 @@ func Parse(r io.Reader) (*ProtoFile, error) {
 
 	protofile := &ProtoFile{}
 
-	v := NewVisitor(protofile)
+	v := newVisitor(protofile)
 
 	for _, element := range definition.Elements {
 		element.Accept(v)
