@@ -1,6 +1,6 @@
 # fproto
 
-[![GoDoc](https://godoc.org/github.com/RangelReale/fproto?status.svg)](https://godoc.org/github.com/emicklei/proto)
+[![GoDoc](https://godoc.org/github.com/RangelReale/fproto?status.svg)](https://godoc.org/github.com/RangelReale/fproto)
 
 Package for parsing Google Protocol Buffers into Go structs [.proto files version 2 + 3] (https://developers.google.com/protocol-buffers/docs/reference/proto3-spec)
 
