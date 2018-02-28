@@ -9,8 +9,7 @@ import (
 type ScalarType int
 
 const (
-	AnyScalar ScalarType = iota + 1
-	BoolScalar
+	BoolScalar ScalarType = iota + 1
 	BytesScalar
 	DoubleScalar
 	FloatScalar
@@ -28,7 +27,6 @@ const (
 )
 
 var scalarLookupMap = map[string]ScalarType{
-	"any":      AnyScalar,
 	"bool":     BoolScalar,
 	"bytes":    BytesScalar,
 	"double":   DoubleScalar,
@@ -46,7 +44,25 @@ var scalarLookupMap = map[string]ScalarType{
 	"uint64":   Uint64Scalar,
 }
 
-func (s ScalarType) String() string {
+var scalarGoTypeLookupMap = map[ScalarType]string{
+	BoolScalar:     "bool",
+	BytesScalar:    "[]byte",
+	DoubleScalar:   "float64",
+	FloatScalar:    "float32",
+	Fixed32Scalar:  "uint32",
+	Fixed64Scalar:  "uint64",
+	Int32Scalar:    "int32",
+	Int64Scalar:    "int64",
+	Sfixed32Scalar: "int32",
+	Sfixed64Scalar: "int64",
+	Sint32Scalar:   "int32",
+	Sint64Scalar:   "int64",
+	StringScalar:   "string",
+	Uint32Scalar:   "uint32",
+	Uint64Scalar:   "uint64",
+}
+
+func (s ScalarType) ProtoType() string {
 	for n, v := range scalarLookupMap {
 		if v == s {
 			return n
@@ -55,11 +71,15 @@ func (s ScalarType) String() string {
 	return ""
 }
 
+func (s ScalarType) GoType() string {
+	return scalarGoTypeLookupMap[s]
+}
+
 func ParseScalarType(s string) (ScalarType, bool) {
 	key := strings.ToLower(s)
 	if st, ok := scalarLookupMap[key]; ok {
 		return st, true
 	} else {
-		return AnyScalar, false
+		return BoolScalar, false
 	}
 }
