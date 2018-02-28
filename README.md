@@ -19,9 +19,10 @@ The subpackage "fdep" uses this to build relationships between proto files and e
 	package main
 
 	import (
-		"os"
+	    "fmt"
+        "os"
 
-		"github.com/RangelReale/fproto"
+        "github.com/RangelReale/fproto"
 	)
 
 	func main() {
