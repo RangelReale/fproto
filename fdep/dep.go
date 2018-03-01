@@ -2,6 +2,7 @@ package fdep
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -76,21 +77,33 @@ func (d *Dep) AddFile(currentpath string, filename string, deptype FileDepType) 
 	}
 	defer file.Close()
 
+	// builds the file path
+	fpath := path.Join(currentpath, filepath.Base(filename))
+
+	// reads the file
+	return d.AddReader(fpath, file, deptype)
+}
+
+// Adds a single file to the dependency, using an reader.
+// Ex: dep.AddReader("google/protobuf/Empty.proto", reader, fdep.DepType_Imported)
+func (d *Dep) AddReader(filepath string, r io.Reader, deptype FileDepType) error {
 	// parses the file
-	pfile, err := fproto.Parse(file)
+	pfile, err := fproto.Parse(r)
 	if err != nil {
-		return fmt.Errorf("Error parsing file %s: %v", filename, err)
+		return fmt.Errorf("Error parsing file %s: %v", filepath, err)
 	}
 
 	// adds the file to the list
-	fpath := path.Join(currentpath, filepath.Base(filename))
-	d.Files[fpath] = &FileDep{
-		FilePath:  fpath,
+	d.Files[filepath] = &FileDep{
+		FilePath:  filepath,
 		DepType:   deptype,
 		Dep:       d,
 		ProtoFile: pfile,
 	}
-	d.addPackage(fpath)
+
+	// add to the package list
+	d.addPackage(filepath)
+
 	return nil
 }
 
