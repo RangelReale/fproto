@@ -1,5 +1,6 @@
 package fproto
 
+// This error is issued when the protobuf file is malformed
 type InvalidScope struct {
 	message string
 }

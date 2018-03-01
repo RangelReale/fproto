@@ -6,6 +6,7 @@ import (
 	"github.com/emicklei/proto"
 )
 
+// Parses an io.Reader corresponding to a .proto file into a ProtoFile struct
 func Parse(r io.Reader) (*ProtoFile, error) {
 	parser := proto.NewParser(r)
 	definition, err := parser.Parse()

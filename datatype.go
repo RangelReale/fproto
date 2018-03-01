@@ -62,6 +62,7 @@ var scalarGoTypeLookupMap = map[ScalarType]string{
 	Uint64Scalar:   "uint64",
 }
 
+// Returns the protobuf type string for the scalar type
 func (s ScalarType) ProtoType() string {
 	for n, v := range scalarLookupMap {
 		if v == s {
@@ -71,10 +72,13 @@ func (s ScalarType) ProtoType() string {
 	return ""
 }
 
+// Returns the go type string for the scalar type
 func (s ScalarType) GoType() string {
 	return scalarGoTypeLookupMap[s]
 }
 
+// Parses the protobuf type into ScalarType. The bool parameters indicates if
+// the type is scalar or not
 func ParseScalarType(s string) (ScalarType, bool) {
 	key := strings.ToLower(s)
 	if st, ok := scalarLookupMap[key]; ok {

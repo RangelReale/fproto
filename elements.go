@@ -142,7 +142,7 @@ type MessageElement struct {
 // any public import dependencies, any options, enums, messages, services,
 // extension declarations etc.
 //
-// This is populated by the parser & post-validation returned to the
+// This is populated by the parser and returned to the
 // client code.
 type ProtoFile struct {
 	PackageName        string

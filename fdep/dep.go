@@ -11,11 +11,17 @@ import (
 	"github.com/RangelReale/fproto"
 )
 
+// Dep represents an .proto file hierarchy with dependencies between files.
 type Dep struct {
-	Files    map[string]*FileDep
+	// List of files parsed. The file names are the INTERNAL name, like "google/protobuf/empty.proto".
+	Files map[string]*FileDep
+
+	// List of packages of the parsed files, with a list of files if a package have more than one.
+	// The list of files should be used on the Files member to find the file itself.
 	Packages map[string][]string
 }
 
+// Creates a new Dep struct.
 func NewDep() *Dep {
 	return &Dep{
 		Files:    make(map[string]*FileDep),
@@ -23,10 +29,20 @@ func NewDep() *Dep {
 	}
 }
 
+// Add files from one directory recursively, assuming this is a .protobuf root path.
+// Ex: dep.AddPath("/protoc-3.5.1/include", fdep.DepType_Imported)
+// This will add files from google/protobuf directory.
 func (d *Dep) AddPath(dir string, deptype FileDepType) error {
 	return d.AddPathWithRoot("", dir, deptype)
 }
 
+// Add files from one directory recursively, using "currentpath" as the root path of this directory.
+// Ex: dep.AddPathWithRoot("google", "/protoc-3.5.1/include/google", fdep.DepType_Imported)
+// This will add files from protobuf directory, assuming they are on the "google" path.
+//
+// These 2 commands have exactly the same effect:
+// 		dep.AddPath("/protoc-3.5.1/include", fdep.DepType_Imported)
+// 		dep.AddPathWithRoot("google", "/protoc-3.5.1/include/google", fdep.DepType_Imported)
 func (d *Dep) AddPathWithRoot(currentpath, dir string, deptype FileDepType) error {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
@@ -51,6 +67,8 @@ func (d *Dep) AddPathWithRoot(currentpath, dir string, deptype FileDepType) erro
 	return nil
 }
 
+// Adds a single file to the dependency, assuming the file's path as "currentpath".
+// Ex: dep.AddFile("google/protobuf", "/protoc-3.5.1/include/google/protobuf/empty.proto", fdep.DepType_Imported)
 func (d *Dep) AddFile(currentpath string, filename string, deptype FileDepType) error {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -58,11 +76,13 @@ func (d *Dep) AddFile(currentpath string, filename string, deptype FileDepType) 
 	}
 	defer file.Close()
 
+	// parses the file
 	pfile, err := fproto.Parse(file)
 	if err != nil {
 		return fmt.Errorf("Error parsing file %s: %v", filename, err)
 	}
 
+	// adds the file to the list
 	fpath := path.Join(currentpath, filepath.Base(filename))
 	d.Files[fpath] = &FileDep{
 		FilePath:  fpath,
@@ -74,6 +94,7 @@ func (d *Dep) AddFile(currentpath string, filename string, deptype FileDepType) 
 	return nil
 }
 
+// Adds the package of the file to the Packages list.
 func (d *Dep) addPackage(filepath string) {
 	pkg := d.Files[filepath].ProtoFile.PackageName
 	if _, ok := d.Packages[pkg]; !ok {
@@ -83,6 +104,10 @@ func (d *Dep) addPackage(filepath string) {
 	d.Packages[pkg] = append(d.Packages[pkg], filepath)
 }
 
+// Returns one named type from the dependency.
+//
+// If multiple types are found for the same name, an error is issued.
+// If there is this possibility, use the GetTypes method instead.
 func (d *Dep) GetType(name string) (*DepType, error) {
 	t, err := d.GetTypes(name)
 	if err != nil {
@@ -96,10 +121,15 @@ func (d *Dep) GetType(name string) (*DepType, error) {
 	return t[0], nil
 }
 
+// Returns all named types from the dependency.
+//
+// Use this method if there is a possibility that one name resolves to more than one type.
 func (d *Dep) GetTypes(name string) ([]*DepType, error) {
 	return d.internalGetTypes(name, nil)
 }
 
+// This functions is the one that really does the type finding.
+// If filedep is not-nil, the type is returned in relation to it.
 func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error) {
 	ret := make([]*DepType, 0)
 
@@ -114,6 +144,13 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 		}
 	}
 
+	// builds a list of possible package names from the dotted name.
+	// for example, if name = "google.protobuf.Empty", this will search for
+	// package "google", then "google.protobuf", but only "google.protobuf" will
+	// be found and added to the list.
+	//
+	// The map item value will contain the rest of the type name, in the example case,
+	// "Empty". It can also contain dots in case of nested items.
 	pkgs := make(map[string]string)
 
 	sp := strings.Split(name, ".")
@@ -133,11 +170,14 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 		return nil, fmt.Errorf("Package for type '%s' not found", name)
 	}
 
+	// Loop into the found packages.
 	for sppkg, spname := range pkgs {
+		// Loop into the files of these packages.
 		for _, f := range d.Packages[sppkg] {
 			include_file := false
 
 			if filedep != nil {
+				// If a file was passed, only check on the dependencies of the file.
 				for _, ffdep := range filedep.ProtoFile.Dependencies {
 					if ffdep == f {
 						include_file = true
@@ -145,10 +185,12 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 					}
 				}
 			} else {
+				// Else check all files
 				include_file = true
 			}
 
 			if include_file {
+				// Search the name on the current proto file.
 				for _, t := range d.Files[f].ProtoFile.FindName(spname) {
 					ret = append(ret, &DepType{
 						FileDep: d.Files[f],

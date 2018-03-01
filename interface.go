@@ -1,5 +1,9 @@
 package fproto
 
+//
+// Internal interfaces to help build the structs.
+//
+
 type iAddOption interface {
 	addOptionElement(e *OptionElement)
 }

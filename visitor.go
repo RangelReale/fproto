@@ -6,6 +6,8 @@ import (
 	"github.com/emicklei/proto"
 )
 
+// Internal classes to parse the .proto file into the ProtoFile struct.
+
 type visitor struct {
 	protofile *ProtoFile
 	scope     interface{}
