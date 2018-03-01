@@ -26,7 +26,7 @@ func (v *visitor) Err() error {
 }
 
 func (v *visitor) errInvalidScope(item, name string) {
-	v.err = &InvalidScope{fmt.Sprint("Invalid scope for item '%s' (%s)")}
+	v.err = &InvalidScope{fmt.Sprintf("Invalid scope for item '%s' (%s)", item, name)}
 }
 
 func (v *visitor) visitElements(ml []proto.Visitee) {
