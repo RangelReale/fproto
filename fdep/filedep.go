@@ -45,7 +45,9 @@ func (fd *FileDep) GetType(name string) (*DepType, error) {
 		return nil, err
 	}
 
-	if len(t) > 1 {
+	if len(t) == 0 {
+		return nil, nil
+	} else if len(t) > 1 {
 		return nil, fmt.Errorf("More than one type found for '%s'", name)
 	}
 

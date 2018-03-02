@@ -180,7 +180,7 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 			return ret, nil
 		}
 
-		return nil, fmt.Errorf("Package for type '%s' not found", name)
+		return nil, nil
 	}
 
 	// Loop into the found packages.
