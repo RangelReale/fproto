@@ -68,17 +68,7 @@ func (f *MessageElement) FindName(name string) []interface{} {
 			}
 		}
 		for _, el := range f.Fields {
-			if el.Name == nfirst {
-				ret = append(ret, el)
-			}
-		}
-		for _, el := range f.MapFields {
-			if el.Name == nfirst {
-				ret = append(ret, el)
-			}
-		}
-		for _, el := range f.OneOfs {
-			if el.Name == nfirst {
+			if el.FieldName() == nfirst {
 				ret = append(ret, el)
 			}
 		}

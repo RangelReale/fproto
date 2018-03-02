@@ -191,7 +191,7 @@ func (v *visitor) VisitNormalField(i *proto.NormalField) {
 
 	// add to scope
 	if el, ok := v.scope.(iAddField); ok {
-		el.addFieldElement(newf)
+		el.addField(newf)
 	} else {
 		v.errInvalidScope("field", i.Name)
 	}
@@ -289,12 +289,11 @@ func (v *visitor) VisitOneof(o *proto.Oneof) {
 	}
 
 	// add to scope
-	if el, ok := v.scope.(iAddOneOf); ok {
-		el.addOneOfElement(newo)
+	if el, ok := v.scope.(iAddField); ok {
+		el.addField(newo)
 	} else {
 		v.errInvalidScope("oneof", o.Name)
 	}
-
 }
 
 func (v *visitor) VisitOneofField(o *proto.OneOfField) {
@@ -323,7 +322,7 @@ func (v *visitor) VisitOneofField(o *proto.OneOfField) {
 
 	// add to scope
 	if el, ok := v.scope.(iAddField); ok {
-		el.addFieldElement(newf)
+		el.addField(newf)
 	} else {
 		v.errInvalidScope("oneof field", o.Name)
 	}
@@ -425,8 +424,8 @@ func (v *visitor) VisitMapField(f *proto.MapField) {
 	}
 
 	// add to scope
-	if el, ok := v.scope.(iAddMapField); ok {
-		el.addMapFieldElement(newf)
+	if el, ok := v.scope.(iAddField); ok {
+		el.addField(newf)
 	} else {
 		v.errInvalidScope("map field", f.Name)
 	}

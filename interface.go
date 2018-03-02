@@ -25,15 +25,7 @@ type iAddService interface {
 }
 
 type iAddField interface {
-	addFieldElement(e *FieldElement)
-}
-
-type iAddMapField interface {
-	addMapFieldElement(e *MapFieldElement)
-}
-
-type iAddOneOf interface {
-	addOneOfElement(e *OneOfElement)
+	addField(e FieldElementTag)
 }
 
 type iAddExtensions interface {
@@ -128,12 +120,8 @@ func (el *OneOfElement) addOptionElement(e *OptionElement) {
 	el.Options = append(el.Options, e)
 }
 
-func (el *OneOfElement) addFieldElement(e *FieldElement) {
+func (el *OneOfElement) addField(e FieldElementTag) {
 	el.Fields = append(el.Fields, e)
-}
-
-func (el *OneOfElement) addMapFieldElement(e *MapFieldElement) {
-	el.MapFields = append(el.MapFields, e)
 }
 
 //
@@ -144,12 +132,8 @@ func (el *MessageElement) addOptionElement(e *OptionElement) {
 	el.Options = append(el.Options, e)
 }
 
-func (el *MessageElement) addFieldElement(e *FieldElement) {
+func (el *MessageElement) addField(e FieldElementTag) {
 	el.Fields = append(el.Fields, e)
-}
-
-func (el *MessageElement) addMapFieldElement(e *MapFieldElement) {
-	el.MapFields = append(el.MapFields, e)
 }
 
 func (el *MessageElement) addEnumElement(e *EnumElement) {
@@ -158,10 +142,6 @@ func (el *MessageElement) addEnumElement(e *EnumElement) {
 
 func (el *MessageElement) addMessageElement(e *MessageElement) {
 	el.Messages = append(el.Messages, e)
-}
-
-func (el *MessageElement) addOneOfElement(e *OneOfElement) {
-	el.OneOfs = append(el.OneOfs, e)
 }
 
 func (el *MessageElement) addExtensionsElement(e *ExtensionsElement) {

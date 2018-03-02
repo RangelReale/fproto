@@ -57,6 +57,10 @@ type ServiceElement struct {
 	RPCs          []*RPCElement
 }
 
+type FieldElementTag interface {
+	FieldName() string
+}
+
 // FieldElement is a datastructure which models
 // a field of a message, a field of a oneof element
 // or an entry in the extend declaration in a protobuf file.
@@ -72,12 +76,20 @@ type FieldElement struct {
 	Tag           int
 }
 
+func (f *FieldElement) FieldName() string {
+	return f.Name
+}
+
 // MapFieldElement is a datastructure which models
 // a map field of a message
 type MapFieldElement struct {
 	Parent interface{}
 	*FieldElement
 	KeyType string
+}
+
+func (f *MapFieldElement) FieldName() string {
+	return f.Name
 }
 
 // OneOfElement is a datastructure which models
@@ -89,8 +101,11 @@ type OneOfElement struct {
 	Name          string
 	Documentation string
 	Options       []*OptionElement
-	Fields        []*FieldElement
-	MapFields     []*MapFieldElement
+	Fields        []FieldElementTag
+}
+
+func (f *OneOfElement) FieldName() string {
+	return f.Name
 }
 
 // ExtensionsElement is a datastructure which models
@@ -125,11 +140,9 @@ type MessageElement struct {
 	Documentation  string
 	IsExtend       bool
 	Options        []*OptionElement
-	Fields         []*FieldElement
-	MapFields      []*MapFieldElement
+	Fields         []FieldElementTag
 	Enums          []*EnumElement
 	Messages       []*MessageElement
-	OneOfs         []*OneOfElement
 	Extensions     []*ExtensionsElement
 	ReservedRanges []*ReservedRangeElement
 	ReservedNames  []string
