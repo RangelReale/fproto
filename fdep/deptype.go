@@ -1,5 +1,7 @@
 package fdep
 
+import "github.com/RangelReale/fproto"
+
 // DepType represents one type into one .proto file.
 type DepType struct {
 	// The file where the type is defined.
@@ -15,4 +17,13 @@ type DepType struct {
 
 	// The *fproto.XXXElement corresponding to the type.
 	Item interface{}
+}
+
+func (d *DepType) IsPointer() bool {
+	switch d.Item.(type) {
+	case *fproto.MessageElement:
+		return true
+	default:
+		return false
+	}
 }

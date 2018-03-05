@@ -23,7 +23,7 @@ func (f *ProtoFile) FindName(name string) []interface{} {
 	nfirst, nrest := NameSplit(name)
 
 	// items that cannot nest
-	if nrest != "" {
+	if nrest == "" {
 		for _, el := range f.Enums {
 			if el.Name == nfirst {
 				ret = append(ret, el)
@@ -61,7 +61,7 @@ func (f *MessageElement) FindName(name string) []interface{} {
 	nfirst, nrest := NameSplit(name)
 
 	// items that cannot nest
-	if nrest != "" {
+	if nrest == "" {
 		for _, el := range f.Enums {
 			if el.Name == nfirst {
 				ret = append(ret, el)
