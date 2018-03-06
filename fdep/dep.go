@@ -107,6 +107,22 @@ func (d *Dep) AddReader(filepath string, r io.Reader, deptype FileDepType) error
 	return nil
 }
 
+// Adds files from a provider
+func (d *Dep) AddFileProvider(fp FileProvider) error {
+	for fp.HasNext() {
+		filepath, r, deptype, err := fp.GetNext()
+		if err != nil {
+			return err
+		}
+
+		err = d.AddReader(filepath, r, deptype)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Adds the package of the file to the Packages list.
 func (d *Dep) addPackage(filepath string) {
 	pkg := d.Files[filepath].ProtoFile.PackageName
