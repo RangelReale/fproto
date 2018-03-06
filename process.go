@@ -53,6 +53,16 @@ func (f *ProtoFile) FindName(name string) []FProtoElement {
 	return ret
 }
 
+// Finds an option on the ProtoFile by name.
+func (f *ProtoFile) FindOption(name string) *OptionElement {
+	for _, o := range f.Options {
+		if o.Name == name {
+			return o
+		}
+	}
+	return nil
+}
+
 // Finds elements on the Message by name. Dots can be used to get an inner scope.
 // Only Enum, Field, MapField, OneOf and inner Message are searched.
 func (f *MessageElement) FindName(name string) []FProtoElement {
