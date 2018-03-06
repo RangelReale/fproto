@@ -4,10 +4,10 @@ package fproto
 // the option construct in a protobuf file. Option constructs
 // exist at various levels/contexts like file, message etc.
 type OptionElement struct {
-	Parent FProtoElement
-	Name   string
-	Value  string
-	//IsParenthesized bool
+	Parent          FProtoElement
+	Name            string
+	Value           string
+	IsParenthesized bool
 }
 
 // EnumConstantElement is a datastructure which models

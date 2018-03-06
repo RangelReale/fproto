@@ -2,6 +2,7 @@ package fproto
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/emicklei/proto"
 )
@@ -125,10 +126,19 @@ func (v *visitor) VisitOption(o *proto.Option) {
 	}
 
 	if el, ok := v.scope.(iAddOption); ok {
+		oname := o.Name
+		is_parenthesized := false
+
+		if strings.HasPrefix(oname, "(") {
+			is_parenthesized = true
+			oname = strings.TrimPrefix(strings.TrimSuffix(oname, ")"), "(")
+		}
+
 		el.addOptionElement(&OptionElement{
-			Parent: v.scope,
-			Name:   o.Name,
-			Value:  o.Constant.Source,
+			Parent:          v.scope,
+			Name:            oname,
+			Value:           o.Constant.Source,
+			IsParenthesized: is_parenthesized,
 		})
 	} else {
 		v.errInvalidScope("public dependency", o.Name)
