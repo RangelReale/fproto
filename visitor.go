@@ -10,7 +10,7 @@ import (
 
 type visitor struct {
 	protofile *ProtoFile
-	scope     interface{}
+	scope     FProtoElement
 	err       error
 }
 
