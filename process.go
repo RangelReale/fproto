@@ -17,8 +17,8 @@ func NameSplit(name string) (first, rest string) {
 // Finds elements on the ProtoFile by name. Dots can be used to get an inner scope.
 // Only Enum, Service and Message are searched.
 // Ex: FindName("User.Address")
-func (f *ProtoFile) FindName(name string) []interface{} {
-	ret := make([]interface{}, 0)
+func (f *ProtoFile) FindName(name string) []FProtoElement {
+	ret := make([]FProtoElement, 0)
 
 	nfirst, nrest := NameSplit(name)
 
@@ -55,8 +55,8 @@ func (f *ProtoFile) FindName(name string) []interface{} {
 
 // Finds elements on the Message by name. Dots can be used to get an inner scope.
 // Only Enum, Field, MapField, OneOf and inner Message are searched.
-func (f *MessageElement) FindName(name string) []interface{} {
-	ret := make([]interface{}, 0)
+func (f *MessageElement) FindName(name string) []FProtoElement {
+	ret := make([]FProtoElement, 0)
 
 	nfirst, nrest := NameSplit(name)
 

@@ -1,6 +1,14 @@
 package fproto
 
 //
+// Tag interface
+//
+
+type FProtoElement interface {
+	FProtoElement()
+}
+
+//
 // Internal interfaces to help build the structs.
 //
 

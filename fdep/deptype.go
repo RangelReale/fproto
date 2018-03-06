@@ -16,7 +16,7 @@ type DepType struct {
 	Name string
 
 	// The *fproto.XXXElement corresponding to the type.
-	Item interface{}
+	Item fproto.FProtoElement
 }
 
 func (d *DepType) IsPointer() bool {

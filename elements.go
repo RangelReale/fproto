@@ -58,6 +58,7 @@ type ServiceElement struct {
 }
 
 type FieldElementTag interface {
+	FProtoElement
 	FieldName() string
 }
 
@@ -168,3 +169,18 @@ type ProtoFile struct {
 	Messages           []*MessageElement
 	Services           []*ServiceElement
 }
+
+// Tag interfaces
+
+func (e *OptionElement) FProtoElement()        {}
+func (e *EnumConstantElement) FProtoElement()  {}
+func (e *EnumElement) FProtoElement()          {}
+func (e *RPCElement) FProtoElement()           {}
+func (e *ServiceElement) FProtoElement()       {}
+func (e *FieldElement) FProtoElement()         {}
+func (e *MapFieldElement) FProtoElement()      {}
+func (e *OneOfElement) FProtoElement()         {}
+func (e *ExtensionsElement) FProtoElement()    {}
+func (e *ReservedRangeElement) FProtoElement() {}
+func (e *MessageElement) FProtoElement()       {}
+func (e *ProtoFile) FProtoElement()            {}
