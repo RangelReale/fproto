@@ -14,6 +14,10 @@ func NameSplit(name string) (first, rest string) {
 	}
 }
 
+//
+// PROCESS: ProtoFile
+//
+
 // Finds elements on the ProtoFile by name. Dots can be used to get an inner scope.
 // Only Enum, Service and Message are searched.
 // Ex: FindName("User.Address")
@@ -53,7 +57,7 @@ func (f *ProtoFile) FindName(name string) []FProtoElement {
 	return ret
 }
 
-// Finds an option on the ProtoFile by name.
+// Finds an option by name.
 func (f *ProtoFile) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
 		if o.Name == name {
@@ -62,6 +66,10 @@ func (f *ProtoFile) FindOption(name string) *OptionElement {
 	}
 	return nil
 }
+
+//
+// PROCESS: MessageElement
+//
 
 // Finds elements on the Message by name. Dots can be used to get an inner scope.
 // Only Enum, Field, MapField, OneOf and inner Message are searched.
@@ -99,4 +107,133 @@ func (f *MessageElement) FindName(name string) []FProtoElement {
 	}
 
 	return ret
+}
+
+// Finds an option by name.
+func (f *MessageElement) FindOption(name string) *OptionElement {
+	for _, o := range f.Options {
+		if o.Name == name {
+			return o
+		}
+	}
+	return nil
+}
+
+//
+// PROCESS: OptionElement
+//
+
+// Finds an option by name.
+func (f *OptionElement) FindOption(name string) *OptionElement {
+	if f.Name == name {
+		return f
+	}
+	return nil
+}
+
+//
+// PROCESS: EnumConstantElement
+//
+
+func (f *EnumConstantElement) FindOption(name string) *OptionElement {
+	for _, o := range f.Options {
+		if o.Name == name {
+			return o
+		}
+	}
+	return nil
+}
+
+//
+// PROCESS: EnumElement
+//
+
+func (f *EnumElement) FindOption(name string) *OptionElement {
+	for _, o := range f.Options {
+		if o.Name == name {
+			return o
+		}
+	}
+	return nil
+}
+
+//
+// PROCESS: RPCElement
+//
+
+func (f *RPCElement) FindOption(name string) *OptionElement {
+	for _, o := range f.Options {
+		if o.Name == name {
+			return o
+		}
+	}
+	return nil
+}
+
+//
+// PROCESS: ServiceElement
+//
+
+func (f *ServiceElement) FindOption(name string) *OptionElement {
+	for _, o := range f.Options {
+		if o.Name == name {
+			return o
+		}
+	}
+	return nil
+}
+
+//
+// PROCESS: FieldElement
+//
+
+func (f *FieldElement) FindOption(name string) *OptionElement {
+	for _, o := range f.Options {
+		if o.Name == name {
+			return o
+		}
+	}
+	return nil
+}
+
+//
+// PROCESS: MapFieldElement
+//
+
+func (f *MapFieldElement) FindOption(name string) *OptionElement {
+	for _, o := range f.Options {
+		if o.Name == name {
+			return o
+		}
+	}
+	return nil
+}
+
+//
+// PROCESS: OneOfElement
+//
+
+func (f *OneOfElement) FindOption(name string) *OptionElement {
+	for _, o := range f.Options {
+		if o.Name == name {
+			return o
+		}
+	}
+	return nil
+}
+
+//
+// PROCESS: ExtensionsElement
+//
+
+func (f *ExtensionsElement) FindOption(name string) *OptionElement {
+	return nil
+}
+
+//
+// PROCESS: ReservedRangeElement
+//
+
+func (f *ReservedRangeElement) FindOption(name string) *OptionElement {
+	return nil
 }
