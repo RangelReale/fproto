@@ -30,7 +30,7 @@ type FileDep struct {
 	// The parent dependency list this file is contained.
 	Dep *Dep
 
-	// The parsed proto file.
+	// The parsed proto file. Can be nil it was from an ignored dependency.
 	ProtoFile *fproto.ProtoFile
 }
 

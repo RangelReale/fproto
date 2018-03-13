@@ -6,6 +6,8 @@ package fproto
 
 type FProtoElement interface {
 	FProtoElement()
+	ElementName() string
+	ParentElement() FProtoElement
 	FindOption(name string) *OptionElement
 }
 
@@ -125,11 +127,11 @@ func (el *MapFieldElement) addOptionElement(e *OptionElement) {
 // OneOfElement
 //
 
-func (el *OneOfElement) addOptionElement(e *OptionElement) {
+func (el *OneofFieldElement) addOptionElement(e *OptionElement) {
 	el.Options = append(el.Options, e)
 }
 
-func (el *OneOfElement) addField(e FieldElementTag) {
+func (el *OneofFieldElement) addField(e FieldElementTag) {
 	el.Fields = append(el.Fields, e)
 }
 

@@ -23,6 +23,9 @@ type Dep struct {
 
 	// Directories to look for unknown includes
 	IncludeDirs []string
+
+	// Ignore not found dependencies
+	IgnoreNotFoundDependencies bool
 }
 
 // Creates a new Dep struct.
@@ -148,7 +151,18 @@ func (d *Dep) AddIncludeFile(filepath string) error {
 		}
 	}
 
-	return fmt.Errorf("File not found in include path: %s", filepath)
+	d.Files[filepath] = &FileDep{
+		FilePath:  filepath,
+		DepType:   DepType_Imported,
+		Dep:       d,
+		ProtoFile: nil,
+	}
+
+	if !d.IgnoreNotFoundDependencies {
+		return fmt.Errorf("File not found in include path: %s", filepath)
+	}
+
+	return nil
 }
 
 // Adds files from a provider
@@ -205,6 +219,14 @@ func (d *Dep) GetTypes(name string) ([]*DepType, error) {
 // If filedep is not-nil, the type is returned in relation to it.
 func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error) {
 	ret := make([]*DepType, 0)
+
+	// check if is scalar
+	if scalar, is_scalar := fproto.ParseScalarType(name); is_scalar {
+		ret = append(ret, &DepType{
+			Name:       scalar.GoType(),
+			ScalarType: &scalar,
+		})
+	}
 
 	// locate the name into the own filedep
 	if filedep != nil {

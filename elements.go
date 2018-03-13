@@ -66,6 +66,10 @@ type ServiceElement struct {
 	RPCs    []*RPCElement
 }
 
+// Can be:
+// - FieldElement
+// - MapFieldElement
+// - OneofFieldElement
 type FieldElementTag interface {
 	FProtoElement
 	FieldName() string
@@ -106,7 +110,7 @@ func (f *MapFieldElement) FieldName() string {
 // a oneoff construct in a protobuf file. All the fields in a
 // oneof construct share memory, and at most one field can be
 // set at any time.
-type OneOfElement struct {
+type OneofFieldElement struct {
 	Parent  FProtoElement
 	Name    string
 	Comment *Comment
@@ -114,7 +118,7 @@ type OneOfElement struct {
 	Fields  []FieldElementTag
 }
 
-func (f *OneOfElement) FieldName() string {
+func (f *OneofFieldElement) FieldName() string {
 	return f.Name
 }
 
@@ -188,8 +192,34 @@ func (e *RPCElement) FProtoElement()           {}
 func (e *ServiceElement) FProtoElement()       {}
 func (e *FieldElement) FProtoElement()         {}
 func (e *MapFieldElement) FProtoElement()      {}
-func (e *OneOfElement) FProtoElement()         {}
+func (e *OneofFieldElement) FProtoElement()    {}
 func (e *ExtensionsElement) FProtoElement()    {}
 func (e *ReservedRangeElement) FProtoElement() {}
 func (e *MessageElement) FProtoElement()       {}
 func (e *ProtoFile) FProtoElement()            {}
+
+func (e *OptionElement) ParentElement() FProtoElement        { return e.Parent }
+func (e *EnumConstantElement) ParentElement() FProtoElement  { return e.Parent }
+func (e *EnumElement) ParentElement() FProtoElement          { return e.Parent }
+func (e *RPCElement) ParentElement() FProtoElement           { return e.Parent }
+func (e *ServiceElement) ParentElement() FProtoElement       { return e.Parent }
+func (e *FieldElement) ParentElement() FProtoElement         { return e.Parent }
+func (e *MapFieldElement) ParentElement() FProtoElement      { return e.Parent }
+func (e *OneofFieldElement) ParentElement() FProtoElement    { return e.Parent }
+func (e *ExtensionsElement) ParentElement() FProtoElement    { return e.Parent }
+func (e *ReservedRangeElement) ParentElement() FProtoElement { return e.Parent }
+func (e *MessageElement) ParentElement() FProtoElement       { return e.Parent }
+func (e *ProtoFile) ParentElement() FProtoElement            { return nil }
+
+func (e *OptionElement) ElementName() string        { return e.Name }
+func (e *EnumConstantElement) ElementName() string  { return e.Name }
+func (e *EnumElement) ElementName() string          { return e.Name }
+func (e *RPCElement) ElementName() string           { return e.Name }
+func (e *ServiceElement) ElementName() string       { return e.Name }
+func (e *FieldElement) ElementName() string         { return e.Name }
+func (e *MapFieldElement) ElementName() string      { return e.Name }
+func (e *OneofFieldElement) ElementName() string    { return e.Name }
+func (e *ExtensionsElement) ElementName() string    { return "" }
+func (e *ReservedRangeElement) ElementName() string { return "" }
+func (e *MessageElement) ElementName() string       { return e.Name }
+func (e *ProtoFile) ElementName() string            { return "" }

@@ -1,6 +1,9 @@
 package fproto
 
-import "strings"
+import (
+	"sort"
+	"strings"
+)
 
 // Parses the dot-separated string into the part before the first dot, and the part after it.
 func NameSplit(name string) (first, rest string) {
@@ -12,6 +15,50 @@ func NameSplit(name string) (first, rest string) {
 	} else {
 		return s[0], strings.Join(s[1:], ".")
 	}
+}
+
+func ScopedName(element FProtoElement) string {
+	return strings.Join(ScopedNameList(element), ".")
+}
+
+func ScopedNameList(element FProtoElement) []string {
+	var ret []string
+	cur := element
+	for cur != nil {
+		ename := cur.ElementName()
+		if ename != "" {
+			ret = append(ret, ename)
+		}
+		cur = cur.ParentElement()
+	}
+
+	// reverse the order
+	sort.Sort(sort.Reverse(sort.StringSlice(ret)))
+
+	return ret
+}
+
+func ScopedAlias(element FProtoElement) string {
+	return strings.Join(ScopedAliasList(element), ".")
+}
+
+func ScopedAliasList(element FProtoElement) []string {
+	var ret []string
+	if element != nil {
+		cur := element.ParentElement()
+		for cur != nil {
+			ename := cur.ElementName()
+			if ename != "" {
+				ret = append(ret, ename)
+			}
+			cur = cur.ParentElement()
+		}
+	}
+
+	// reverse the order
+	sort.Sort(sort.Reverse(sort.StringSlice(ret)))
+
+	return ret
 }
 
 //
@@ -67,6 +114,31 @@ func (f *ProtoFile) FindOption(name string) *OptionElement {
 	return nil
 }
 
+func (f *ProtoFile) CollectEnums() []FProtoElement {
+	var ret []FProtoElement
+
+	for _, el := range f.Enums {
+		ret = append(ret, el)
+	}
+
+	for _, el := range f.Messages {
+		ret = append(ret, el.CollectEnums()...)
+	}
+
+	return ret
+}
+
+func (f *ProtoFile) CollectMessages() []FProtoElement {
+	var ret []FProtoElement
+
+	for _, el := range f.Messages {
+		ret = append(ret, el)
+		ret = append(ret, el.CollectMessages()...)
+	}
+
+	return ret
+}
+
 //
 // PROCESS: MessageElement
 //
@@ -117,6 +189,31 @@ func (f *MessageElement) FindOption(name string) *OptionElement {
 		}
 	}
 	return nil
+}
+
+func (f *MessageElement) CollectEnums() []FProtoElement {
+	var ret []FProtoElement
+
+	for _, el := range f.Enums {
+		ret = append(ret, el)
+	}
+
+	for _, el := range f.Messages {
+		ret = append(ret, el.CollectEnums()...)
+	}
+
+	return ret
+}
+
+func (f *MessageElement) CollectMessages() []FProtoElement {
+	var ret []FProtoElement
+
+	for _, el := range f.Messages {
+		ret = append(ret, el)
+		ret = append(ret, el.CollectMessages()...)
+	}
+
+	return ret
 }
 
 //
@@ -213,7 +310,7 @@ func (f *MapFieldElement) FindOption(name string) *OptionElement {
 // PROCESS: OneOfElement
 //
 
-func (f *OneOfElement) FindOption(name string) *OptionElement {
+func (f *OneofFieldElement) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
 		if o.Name == name {
 			return o
