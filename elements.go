@@ -1,5 +1,13 @@
 package fproto
 
+// Comment one or more comment text lines, either in c- or c++ style.
+type Comment struct {
+	// Lines are comment text lines without prefixes //, ///, /* or suffix */
+	Lines      []string
+	Cstyle     bool // refers to /* ... */,  C++ style is using //
+	ExtraSlash bool // is true if the comment starts with 3 slashes
+}
+
 // OptionElement is a datastructure which models
 // the option construct in a protobuf file. Option constructs
 // exist at various levels/contexts like file, message etc.
@@ -8,17 +16,18 @@ type OptionElement struct {
 	Name            string
 	Value           string
 	IsParenthesized bool
+	Comment         *Comment
 }
 
 // EnumConstantElement is a datastructure which models
 // the fields within an enum construct. Enum constants can
 // also have inline options specified.
 type EnumConstantElement struct {
-	Parent        FProtoElement
-	Name          string
-	Documentation string
-	Options       []*OptionElement
-	Tag           int
+	Parent  FProtoElement
+	Name    string
+	Comment *Comment
+	Options []*OptionElement
+	Tag     int
 }
 
 // EnumElement is a datastructure which models
@@ -27,7 +36,7 @@ type EnumConstantElement struct {
 type EnumElement struct {
 	Parent        FProtoElement
 	Name          string
-	Documentation string
+	Comment       *Comment
 	Options       []*OptionElement
 	EnumConstants []*EnumConstantElement
 }
@@ -38,7 +47,7 @@ type EnumElement struct {
 type RPCElement struct {
 	Parent          FProtoElement
 	Name            string
-	Documentation   string
+	Comment         *Comment
 	Options         []*OptionElement
 	RequestType     string
 	StreamsRequest  bool
@@ -50,11 +59,11 @@ type RPCElement struct {
 // the service construct in a protobuf file. Service
 // construct defines the rpcs (apis) for the service.
 type ServiceElement struct {
-	Parent        FProtoElement
-	Name          string
-	Documentation string
-	Options       []*OptionElement
-	RPCs          []*RPCElement
+	Parent  FProtoElement
+	Name    string
+	Comment *Comment
+	Options []*OptionElement
+	RPCs    []*RPCElement
 }
 
 type FieldElementTag interface {
@@ -66,15 +75,15 @@ type FieldElementTag interface {
 // a field of a message, a field of a oneof element
 // or an entry in the extend declaration in a protobuf file.
 type FieldElement struct {
-	Parent        FProtoElement
-	Name          string
-	Documentation string
-	Options       []*OptionElement
-	Repeated      bool
-	Optional      bool // proto2
-	Required      bool // proto2
-	Type          string
-	Tag           int
+	Parent   FProtoElement
+	Name     string
+	Comment  *Comment
+	Options  []*OptionElement
+	Repeated bool
+	Optional bool // proto2
+	Required bool // proto2
+	Type     string
+	Tag      int
 }
 
 func (f *FieldElement) FieldName() string {
@@ -98,11 +107,11 @@ func (f *MapFieldElement) FieldName() string {
 // oneof construct share memory, and at most one field can be
 // set at any time.
 type OneOfElement struct {
-	Parent        FProtoElement
-	Name          string
-	Documentation string
-	Options       []*OptionElement
-	Fields        []FieldElementTag
+	Parent  FProtoElement
+	Name    string
+	Comment *Comment
+	Options []*OptionElement
+	Fields  []FieldElementTag
 }
 
 func (f *OneOfElement) FieldName() string {
@@ -116,21 +125,21 @@ func (f *OneOfElement) FieldName() string {
 // to the original message definition by defining field ranges which
 // can be used for extensions.
 type ExtensionsElement struct {
-	Parent        FProtoElement
-	Documentation string
-	Start         int
-	End           int
-	IsMax         bool
+	Parent  FProtoElement
+	Comment *Comment
+	Start   int
+	End     int
+	IsMax   bool
 }
 
 // ReservedRangeElement is a datastructure which models
 // a reserved construct in a protobuf message.
 type ReservedRangeElement struct {
-	Parent        FProtoElement
-	Documentation string
-	Start         int
-	End           int
-	IsMax         bool
+	Parent  FProtoElement
+	Comment *Comment
+	Start   int
+	End     int
+	IsMax   bool
 }
 
 // MessageElement is a datastructure which models
@@ -138,7 +147,7 @@ type ReservedRangeElement struct {
 type MessageElement struct {
 	Parent         FProtoElement
 	Name           string
-	Documentation  string
+	Comment        *Comment
 	IsExtend       bool
 	Options        []*OptionElement
 	Fields         []FieldElementTag

@@ -75,6 +75,19 @@ func (fd *FileDep) IsSame(filedep *FileDep) bool {
 	return false
 }
 
+// Checks if the passed FileDep refers to the same package as this one.
+func (fd *FileDep) IsSamePackage(filedep *FileDep) bool {
+	if fd == filedep {
+		return true
+	}
+
+	if path.Dir(fd.FilePath) == path.Dir(filedep.FilePath) && fd.ProtoFile.PackageName == filedep.ProtoFile.PackageName {
+		return true
+	}
+
+	return false
+}
+
 // Returns the go package of the file. If there is no "go_package" option, returns the "path" part of the package name.
 func (fd *FileDep) GoPackage() string {
 	for _, o := range fd.ProtoFile.Options {

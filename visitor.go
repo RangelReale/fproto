@@ -42,6 +42,18 @@ func (v *visitor) visitOptions(ml []*proto.Option) {
 	}
 }
 
+func (v *visitor) copyComment(c *proto.Comment) *Comment {
+	if c != nil {
+		return &Comment{
+			Lines:      c.Lines,
+			Cstyle:     c.Cstyle,
+			ExtraSlash: c.ExtraSlash,
+		}
+	} else {
+		return nil
+	}
+}
+
 func (v *visitor) VisitMessage(m *proto.Message) {
 	if v.err != nil {
 		return
@@ -52,6 +64,7 @@ func (v *visitor) VisitMessage(m *proto.Message) {
 		Parent:   v.scope,
 		Name:     m.Name,
 		IsExtend: m.IsExtend,
+		Comment:  v.copyComment(m.Comment),
 	}
 
 	// visit children
@@ -80,8 +93,9 @@ func (v *visitor) VisitService(s *proto.Service) {
 
 	// create new service element
 	news := &ServiceElement{
-		Parent: v.scope,
-		Name:   s.Name,
+		Parent:  v.scope,
+		Name:    s.Name,
+		Comment: v.copyComment(s.Comment),
 	}
 
 	// visit children
@@ -139,6 +153,7 @@ func (v *visitor) VisitOption(o *proto.Option) {
 			Name:            oname,
 			Value:           o.Constant.Source,
 			IsParenthesized: is_parenthesized,
+			Comment:         v.copyComment(o.Comment),
 		})
 	} else {
 		v.errInvalidScope("public dependency", o.Name)
@@ -186,6 +201,7 @@ func (v *visitor) VisitNormalField(i *proto.NormalField) {
 		Optional: i.Optional,
 		Required: i.Required,
 		Tag:      i.Sequence,
+		Comment:  v.copyComment(i.Comment),
 	}
 
 	// visit children
@@ -214,9 +230,10 @@ func (v *visitor) VisitEnumField(i *proto.EnumField) {
 
 	// create enum constant
 	newe := &EnumConstantElement{
-		Parent: v.scope,
-		Name:   i.Name,
-		Tag:    i.Integer,
+		Parent:  v.scope,
+		Name:    i.Name,
+		Tag:     i.Integer,
+		Comment: v.copyComment(i.Comment),
 	}
 
 	// visit children
@@ -246,8 +263,9 @@ func (v *visitor) VisitEnum(e *proto.Enum) {
 
 	// create enum
 	newe := &EnumElement{
-		Name:   e.Name,
-		Parent: v.scope,
+		Name:    e.Name,
+		Parent:  v.scope,
+		Comment: v.copyComment(e.Comment),
 	}
 
 	// visit children
@@ -283,8 +301,9 @@ func (v *visitor) VisitOneof(o *proto.Oneof) {
 
 	// create oneof
 	newo := &OneOfElement{
-		Parent: v.scope,
-		Name:   o.Name,
+		Parent:  v.scope,
+		Name:    o.Name,
+		Comment: v.copyComment(o.Comment),
 	}
 
 	// visit children
@@ -313,10 +332,11 @@ func (v *visitor) VisitOneofField(o *proto.OneOfField) {
 
 	// create field
 	newf := &FieldElement{
-		Parent: v.scope,
-		Name:   o.Name,
-		Type:   o.Type,
-		Tag:    o.Sequence,
+		Parent:  v.scope,
+		Name:    o.Name,
+		Type:    o.Type,
+		Tag:     o.Sequence,
+		Comment: v.copyComment(o.Comment),
 	}
 
 	// visit children
@@ -347,10 +367,11 @@ func (v *visitor) VisitReserved(r *proto.Reserved) {
 		// add to scope
 		if el, ok := v.scope.(iAddReservedRange); ok {
 			el.addReservedRangeElement(&ReservedRangeElement{
-				Parent: v.scope,
-				Start:  rr.From,
-				End:    rr.To,
-				IsMax:  rr.Max,
+				Parent:  v.scope,
+				Start:   rr.From,
+				End:     rr.To,
+				IsMax:   rr.Max,
+				Comment: v.copyComment(r.Comment), // Copies from the root item
 			})
 		} else {
 			v.errInvalidScope("reserved range", "reserved")
@@ -380,6 +401,7 @@ func (v *visitor) VisitRPC(r *proto.RPC) {
 		StreamsRequest:  r.StreamsRequest,
 		ResponseType:    r.ReturnsType,
 		StreamsResponse: r.StreamsReturns,
+		Comment:         v.copyComment(r.Comment),
 	}
 
 	// visit children
@@ -417,7 +439,8 @@ func (v *visitor) VisitMapField(f *proto.MapField) {
 			//Repeated: f.Repeated,
 			//Optional: f.Optional,
 			//Required: f.Required,
-			Tag: f.Sequence,
+			Tag:     f.Sequence,
+			Comment: v.copyComment(f.Comment),
 		},
 		KeyType: f.KeyType,
 	}
@@ -458,10 +481,11 @@ func (v *visitor) VisitExtensions(e *proto.Extensions) {
 		// add to scope
 		if el, ok := v.scope.(iAddExtensions); ok {
 			el.addExtensionsElement(&ExtensionsElement{
-				Parent: v.scope,
-				Start:  rr.From,
-				End:    rr.To,
-				IsMax:  rr.Max,
+				Parent:  v.scope,
+				Start:   rr.From,
+				End:     rr.To,
+				IsMax:   rr.Max,
+				Comment: v.copyComment(e.Comment), // copies from the root item
 			})
 		} else {
 			v.errInvalidScope("extensions", "extension")
