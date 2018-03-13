@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"path/filepath"
+	gofilepath "path/filepath"
 	"strings"
 
 	"github.com/RangelReale/fproto"
@@ -20,6 +20,9 @@ type Dep struct {
 	// List of packages of the parsed files, with a list of files if a package have more than one.
 	// The list of files should be used on the Files member to find the file itself.
 	Packages map[string][]string
+
+	// Directories to look for unknown includes
+	IncludeDirs []string
 }
 
 // Creates a new Dep struct.
@@ -28,6 +31,18 @@ func NewDep() *Dep {
 		Files:    make(map[string]*FileDep),
 		Packages: make(map[string][]string),
 	}
+}
+
+func (d *Dep) AddIncludeDir(dir string) error {
+	if s, err := os.Stat(dir); err != nil {
+		return fmt.Errorf("Invalid directory %s: %v", dir, err)
+	} else if !s.IsDir() {
+		return fmt.Errorf("Path %s isn't a directory", dir)
+	}
+
+	d.IncludeDirs = append(d.IncludeDirs, dir)
+
+	return nil
 }
 
 // Add files from one directory recursively, assuming this is a .protobuf root path.
@@ -52,10 +67,10 @@ func (d *Dep) AddPathWithRoot(currentpath, dir string, deptype FileDepType) erro
 
 	for _, f := range files {
 		if f.IsDir() {
-			err = d.AddPathWithRoot(path.Join(currentpath, f.Name()), filepath.Join(dir, f.Name()), deptype)
+			err = d.AddPathWithRoot(path.Join(currentpath, f.Name()), gofilepath.Join(dir, f.Name()), deptype)
 		} else {
-			if filepath.Ext(f.Name()) == ".proto" {
-				err = d.AddFile(currentpath, filepath.Join(dir, f.Name()), deptype)
+			if gofilepath.Ext(f.Name()) == ".proto" {
+				err = d.AddFile(currentpath, gofilepath.Join(dir, f.Name()), deptype)
 			} else {
 				err = nil
 			}
@@ -78,7 +93,7 @@ func (d *Dep) AddFile(currentpath string, filename string, deptype FileDepType) 
 	defer file.Close()
 
 	// builds the file path
-	fpath := path.Join(currentpath, filepath.Base(filename))
+	fpath := path.Join(currentpath, gofilepath.Base(filename))
 
 	// reads the file
 	return d.AddReader(fpath, file, deptype)
@@ -101,10 +116,39 @@ func (d *Dep) AddReader(filepath string, r io.Reader, deptype FileDepType) error
 		ProtoFile: pfile,
 	}
 
+	// load file dependencies
+	for _, fd := range pfile.Dependencies {
+		err = d.AddIncludeFile(fd)
+		if err != nil {
+			return err
+		}
+	}
+
 	// add to the package list
 	d.addPackage(filepath)
 
 	return nil
+}
+
+func (d *Dep) AddIncludeFile(filepath string) error {
+	if _, ok := d.Files[filepath]; ok {
+		// File already exists
+		return nil
+	}
+
+	for _, inc := range d.IncludeDirs {
+		inc_file := gofilepath.Join(inc, gofilepath.FromSlash(filepath))
+
+		// check if file exists
+		_, err := os.Stat(inc_file)
+		if err != nil && !os.IsNotExist(err) {
+			return err
+		} else if err == nil {
+			return d.AddFile(path.Dir(filepath), inc_file, DepType_Imported)
+		}
+	}
+
+	return fmt.Errorf("File not found in include path: %s", filepath)
 }
 
 // Adds files from a provider
