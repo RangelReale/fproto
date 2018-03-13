@@ -44,8 +44,12 @@ func (v *visitor) visitOptions(ml []*proto.Option) {
 
 func (v *visitor) copyComment(c *proto.Comment) *Comment {
 	if c != nil {
+		var ln []string
+		for _, lln := range c.Lines {
+			ln = append(ln, strings.TrimSpace(lln))
+		}
 		return &Comment{
-			Lines:      c.Lines,
+			Lines:      ln,
 			Cstyle:     c.Cstyle,
 			ExtraSlash: c.ExtraSlash,
 		}

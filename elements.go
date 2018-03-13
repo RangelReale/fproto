@@ -73,6 +73,8 @@ type ServiceElement struct {
 type FieldElementTag interface {
 	FProtoElement
 	FieldName() string
+	// Returns the smallest field tag (oneof can have more than one tag
+	FirstFieldTag() int
 }
 
 // FieldElement is a datastructure which models
@@ -94,6 +96,10 @@ func (f *FieldElement) FieldName() string {
 	return f.Name
 }
 
+func (f *FieldElement) FirstFieldTag() int {
+	return f.Tag
+}
+
 // MapFieldElement is a datastructure which models
 // a map field of a message
 type MapFieldElement struct {
@@ -104,6 +110,10 @@ type MapFieldElement struct {
 
 func (f *MapFieldElement) FieldName() string {
 	return f.Name
+}
+
+func (f *MapFieldElement) FirstFieldTag() int {
+	return f.Tag
 }
 
 // OneOfElement is a datastructure which models
@@ -120,6 +130,16 @@ type OneofFieldElement struct {
 
 func (f *OneofFieldElement) FieldName() string {
 	return f.Name
+}
+
+func (f *OneofFieldElement) FirstFieldTag() int {
+	smallest := -1
+	for _, fld := range f.Fields {
+		if smallest == -1 || fld.FirstFieldTag() < smallest {
+			smallest = fld.FirstFieldTag()
+		}
+	}
+	return smallest
 }
 
 // ExtensionsElement is a datastructure which models

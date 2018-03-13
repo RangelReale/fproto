@@ -151,15 +151,16 @@ func (d *Dep) AddIncludeFile(filepath string) error {
 		}
 	}
 
+	if !d.IgnoreNotFoundDependencies {
+		return fmt.Errorf("File not found in include path: %s", filepath)
+	}
+
+	// Add file as if it was found, but without a parsed file and without package references
 	d.Files[filepath] = &FileDep{
 		FilePath:  filepath,
 		DepType:   DepType_Imported,
 		Dep:       d,
 		ProtoFile: nil,
-	}
-
-	if !d.IgnoreNotFoundDependencies {
-		return fmt.Errorf("File not found in include path: %s", filepath)
 	}
 
 	return nil
