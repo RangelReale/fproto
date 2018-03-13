@@ -139,6 +139,16 @@ func (f *ProtoFile) CollectMessages() []FProtoElement {
 	return ret
 }
 
+func (f *ProtoFile) CollectServices() []FProtoElement {
+	var ret []FProtoElement
+
+	for _, el := range f.Services {
+		ret = append(ret, el)
+	}
+
+	return ret
+}
+
 //
 // PROCESS: MessageElement
 //

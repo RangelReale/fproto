@@ -1,6 +1,10 @@
 package fdep
 
-import "github.com/RangelReale/fproto"
+import (
+	"fmt"
+
+	"github.com/RangelReale/fproto"
+)
 
 // DepType represents one type into one .proto file.
 type DepType struct {
@@ -29,6 +33,15 @@ func NewDepTypeFromElement(filedep *FileDep, element fproto.FProtoElement) *DepT
 		Alias:   filedep.ProtoFile.PackageName,
 		Name:    fproto.ScopedName(element),
 		Item:    element,
+	}
+}
+
+// Returns the name plus alias, if available
+func (d *DepType) FullName() string {
+	if d.Alias != "" {
+		return fmt.Sprintf("%s.%s", d.Alias, d.Name)
+	} else {
+		return d.Name
 	}
 }
 
