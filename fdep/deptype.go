@@ -2,7 +2,6 @@ package fdep
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/RangelReale/fproto"
 )
@@ -79,47 +78,18 @@ func (d *DepType) IsScalar() bool {
 // If multiple types are found for the same name, an error is issued.
 // If there is this possibility, use the GetTypes method instead.
 func (d *DepType) GetType(name string) (*DepType, error) {
-	if d.FileDep == nil {
+	t, err := d.GetTypes(name)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(t) == 0 {
 		return nil, nil
+	} else if len(t) > 1 {
+		return nil, fmt.Errorf("More than one type found for '%s'", name)
 	}
 
-	// first find normally in the full file
-	dt, err := d.FileDep.GetType(name)
-	if err != nil {
-		return nil, err
-	}
-
-	if dt != nil {
-		return dt, nil
-	}
-
-	// if not found, search in the current scope
-	dt, err = d.FileDep.GetType(fmt.Sprintf("%s.%s", d.Name, name))
-	if err != nil {
-		return nil, err
-	}
-
-	if dt != nil {
-		return dt, nil
-	}
-
-	// if not found, search in each dotted scope of the current alias
-	if d.OriginalAlias != "" {
-		scopes := strings.Split(d.OriginalAlias, ".")
-		for si := 1; si <= len(scopes); si++ {
-			dt, err = d.FileDep.GetType(fmt.Sprintf("%s.%s", strings.Join(scopes[:si], "."), name))
-			if err != nil {
-				return nil, err
-			}
-
-			if dt != nil {
-				return dt, nil
-			}
-		}
-	}
-
-	// Not found in any method
-	return nil, nil
+	return t[0], nil
 }
 
 // Returns all named types from the dependency, in relation to the current type.

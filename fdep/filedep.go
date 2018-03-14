@@ -3,6 +3,7 @@ package fdep
 import (
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/RangelReale/fproto"
 )
@@ -57,9 +58,36 @@ func (fd *FileDep) GetType(name string) (*DepType, error) {
 // Returns all named types from the dependency, in relation to the current file.
 // If the type is from the current file, the "Alias" field is blank.
 //
+// If not found using the name, the current file's package is searched recursivelly
+// appending the name.
+//
 // Use this method if there is a possibility that one name resolves to more than one type.
 func (fd *FileDep) GetTypes(name string) ([]*DepType, error) {
-	return fd.Dep.internalGetTypes(name, fd)
+	t, err := fd.Dep.internalGetTypes(name, fd)
+	if err != nil {
+		return nil, err
+	}
+	if len(t) > 0 {
+		return t, nil
+	}
+
+	// if not found, search in each dotted scope of the current file's package
+	if fd.ProtoFile != nil && fd.ProtoFile.PackageName != "" {
+		scopes := strings.Split(fd.ProtoFile.PackageName, ".")
+		for si := 1; si <= len(scopes); si++ {
+			t, err = fd.Dep.internalGetTypes(fmt.Sprintf("%s.%s", strings.Join(scopes[:si], "."), name), fd)
+			if err != nil {
+				return nil, err
+			}
+
+			if t != nil {
+				return t, nil
+			}
+		}
+	}
+
+	// Not found in any method
+	return nil, nil
 }
 
 // Checks if the passed FileDep refers to the same file as this one.
