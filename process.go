@@ -1,7 +1,6 @@
 package fproto
 
 import (
-	"sort"
 	"strings"
 )
 
@@ -33,9 +32,7 @@ func ScopedNameList(element FProtoElement) []string {
 	}
 
 	// reverse the order
-	sort.Sort(sort.Reverse(sort.StringSlice(ret)))
-
-	return ret
+	return ReverseStr(ret)
 }
 
 func ScopedAlias(element FProtoElement) string {
@@ -56,9 +53,7 @@ func ScopedAliasList(element FProtoElement) []string {
 	}
 
 	// reverse the order
-	sort.Sort(sort.Reverse(sort.StringSlice(ret)))
-
-	return ret
+	return ReverseStr(ret)
 }
 
 //

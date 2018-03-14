@@ -64,6 +64,10 @@ func (fd *FileDep) GetTypes(name string) ([]*DepType, error) {
 
 // Checks if the passed FileDep refers to the same file as this one.
 func (fd *FileDep) IsSame(filedep *FileDep) bool {
+	if filedep == nil {
+		return false
+	}
+
 	if fd == filedep {
 		return true
 	}
