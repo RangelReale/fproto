@@ -226,7 +226,7 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 	// check if is scalar
 	if scalar, is_scalar := fproto.ParseScalarType(name); is_scalar {
 		ret = append(ret, &DepType{
-			Name:       scalar.GoType(),
+			Name:       scalar.ProtoType(),
 			ScalarType: &scalar,
 		})
 	}
