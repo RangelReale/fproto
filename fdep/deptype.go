@@ -16,6 +16,9 @@ type DepType struct {
 	// the file itself.
 	Alias string
 
+	// The original alias of the type, independently of how it was requested.
+	OriginalAlias string
+
 	// The name of the type.
 	Name string
 
@@ -29,10 +32,11 @@ type DepType struct {
 // Creates a new DepType from a file's element.
 func NewDepTypeFromElement(filedep *FileDep, element fproto.FProtoElement) *DepType {
 	return &DepType{
-		FileDep: filedep,
-		Alias:   filedep.ProtoFile.PackageName,
-		Name:    fproto.ScopedName(element),
-		Item:    element,
+		FileDep:       filedep,
+		Alias:         filedep.OriginalAlias(),
+		OriginalAlias: filedep.OriginalAlias(),
+		Name:          fproto.ScopedName(element),
+		Item:          element,
 	}
 }
 
@@ -40,6 +44,15 @@ func NewDepTypeFromElement(filedep *FileDep, element fproto.FProtoElement) *DepT
 func (d *DepType) FullName() string {
 	if d.Alias != "" {
 		return fmt.Sprintf("%s.%s", d.Alias, d.Name)
+	} else {
+		return d.Name
+	}
+}
+
+// Returns the name plus alias, if available
+func (d *DepType) FullOriginalName() string {
+	if d.OriginalAlias != "" {
+		return fmt.Sprintf("%s.%s", d.OriginalAlias, d.Name)
 	} else {
 		return d.Name
 	}
@@ -58,4 +71,49 @@ func (d *DepType) IsPointer() bool {
 // Returns whether the field is scalar.
 func (d *DepType) IsScalar() bool {
 	return d.ScalarType != nil
+}
+
+// Returns one named type from the dependency, in relation to the current type.
+//
+// If multiple types are found for the same name, an error is issued.
+// If there is this possibility, use the GetTypes method instead.
+func (d *DepType) GetType(name string) (*DepType, error) {
+	if d.FileDep == nil {
+		return nil, nil
+	}
+
+	// first find normally in the full file
+	dt, err := d.FileDep.GetType(name)
+	if err != nil {
+		return nil, err
+	}
+
+	if dt != nil {
+		return dt, nil
+	}
+
+	// if not found, search in the current item scope
+	return d.FileDep.GetType(fmt.Sprintf("%s.%s", d.Name, name))
+}
+
+// Returns all named types from the dependency, in relation to the current type.
+//
+// Use this method if there is a possibility that one name resolves to more than one type.
+func (d *DepType) GetTypes(name string) ([]*DepType, error) {
+	if d.FileDep == nil {
+		return nil, nil
+	}
+
+	// first find normally in the full file
+	dt, err := d.FileDep.GetTypes(name)
+	if err != nil {
+		return nil, err
+	}
+
+	if dt != nil && len(dt) > 0 {
+		return dt, nil
+	}
+
+	// if not found, search in the current item scope
+	return d.FileDep.GetTypes(fmt.Sprintf("%s.%s", d.Name, name))
 }

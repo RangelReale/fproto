@@ -204,6 +204,8 @@ func (d *Dep) GetType(name string) (*DepType, error) {
 
 	if len(t) > 1 {
 		return nil, fmt.Errorf("More than one type found for '%s'", name)
+	} else if len(t) == 0 {
+		return nil, nil
 	}
 
 	return t[0], nil
@@ -233,9 +235,10 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 	if filedep != nil {
 		for _, t := range filedep.ProtoFile.FindName(name) {
 			ret = append(ret, &DepType{
-				FileDep: filedep,
-				Name:    name,
-				Item:    t,
+				FileDep:       filedep,
+				OriginalAlias: filedep.OriginalAlias(),
+				Name:          name,
+				Item:          t,
 			})
 		}
 	}
@@ -289,10 +292,11 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 				// Search the name on the current proto file.
 				for _, t := range d.Files[f].ProtoFile.FindName(spname) {
 					ret = append(ret, &DepType{
-						FileDep: d.Files[f],
-						Alias:   sppkg,
-						Name:    spname,
-						Item:    t,
+						FileDep:       d.Files[f],
+						Alias:         sppkg,
+						OriginalAlias: sppkg,
+						Name:          spname,
+						Item:          t,
 					})
 				}
 			}

@@ -75,6 +75,13 @@ func (fd *FileDep) IsSame(filedep *FileDep) bool {
 	return false
 }
 
+func (fd *FileDep) OriginalAlias() string {
+	if fd.ProtoFile != nil {
+		return fd.ProtoFile.PackageName
+	}
+	return ""
+}
+
 // Checks if the passed FileDep refers to the same package as this one.
 func (fd *FileDep) IsSamePackage(filedep *FileDep) bool {
 	if fd == filedep {
