@@ -42,8 +42,8 @@ The subpackage "fdep" uses this to build relationships between proto files and e
 	
 ### related
 
- * [https://github.com/RangelReale/fproto-gowrap](https://github.com/RangelReale/fproto-gowrap)
-    Generates easier-to-use wrappers for the standard Go protobuf generated files.
+ * [https://github.com/RangelReale/fproto-wrap](https://github.com/RangelReale/fproto-wrap)
+    Generates easier-to-use wrappers for the standard protobuf generated files.
 	
 ### author
 
