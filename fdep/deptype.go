@@ -68,6 +68,15 @@ func (d *DepType) IsPointer() bool {
 	}
 }
 
+// Returns whether the field can be a pointer. (the scalar []byte cannot)
+func (d *DepType) CanPointer() bool {
+	if d.ScalarType != nil && *d.ScalarType == fproto.BytesScalar {
+		return false
+	}
+
+	return true
+}
+
 // Returns whether the field is scalar.
 func (d *DepType) IsScalar() bool {
 	return d.ScalarType != nil

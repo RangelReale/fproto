@@ -218,6 +218,13 @@ func (d *Dep) GetTypes(name string) ([]*DepType, error) {
 	return d.internalGetTypes(name, nil)
 }
 
+func (d *Dep) GetScalarType(scalarType fproto.ScalarType) *DepType {
+	return &DepType{
+		Name:       scalarType.ProtoType(),
+		ScalarType: &scalarType,
+	}
+}
+
 // This functions is the one that really does the type finding.
 // If filedep is not-nil, the type is returned in relation to it.
 func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error) {
@@ -225,10 +232,7 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 
 	// check if is scalar
 	if scalar, is_scalar := fproto.ParseScalarType(name); is_scalar {
-		ret = append(ret, &DepType{
-			Name:       scalar.ProtoType(),
-			ScalarType: &scalar,
-		})
+		ret = append(ret, d.GetScalarType(scalar))
 	}
 
 	// locate the name into the own filedep
