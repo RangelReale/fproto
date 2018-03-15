@@ -1,5 +1,7 @@
 package fproto
 
+import "bytes"
+
 // Comment one or more comment text lines, either in c- or c++ style.
 type Comment struct {
 	// Lines are comment text lines without prefixes //, ///, /* or suffix */
@@ -8,15 +10,40 @@ type Comment struct {
 	ExtraSlash bool // is true if the comment starts with 3 slashes
 }
 
+// Literal value from source
+type Literal struct {
+	Source   string
+	IsString bool
+}
+
+// SourceRepresentation returns the source (if quoted then use double quote).
+func (l Literal) SourceRepresentation() string {
+	var buf bytes.Buffer
+	if l.IsString {
+		buf.WriteRune('"')
+	}
+	buf.WriteString(l.Source)
+	if l.IsString {
+		buf.WriteRune('"')
+	}
+	return buf.String()
+}
+
+// Raw string content
+func (l Literal) String() string {
+	return l.Source
+}
+
 // OptionElement is a datastructure which models
 // the option construct in a protobuf file. Option constructs
 // exist at various levels/contexts like file, message etc.
 type OptionElement struct {
-	Parent          FProtoElement
-	Name            string
-	Value           string
-	IsParenthesized bool
-	Comment         *Comment
+	Parent            FProtoElement
+	Name              string
+	ParenthesizedName string
+	Value             Literal
+	AggregatedValues  map[string]Literal
+	Comment           *Comment
 }
 
 // EnumConstantElement is a datastructure which models

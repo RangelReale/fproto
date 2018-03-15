@@ -145,20 +145,34 @@ func (v *visitor) VisitOption(o *proto.Option) {
 
 	if el, ok := v.scope.(iAddOption); ok {
 		oname := o.Name
-		is_parenthesized := false
+		parenthesizedName := ""
 
 		if strings.HasPrefix(oname, "(") {
-			is_parenthesized = true
-			oname = strings.TrimPrefix(strings.TrimSuffix(oname, ")"), "(")
+			pparse := strings.Split(oname, ")")
+
+			parenthesizedName = pparse[0][1:]
+			oname = parenthesizedName
+			if len(pparse) > 1 {
+				// rebuild string
+				oname += strings.Join(pparse[1:], ")")
+			}
 		}
 
-		el.addOptionElement(&OptionElement{
-			Parent:          v.scope,
-			Name:            oname,
-			Value:           o.Constant.Source,
-			IsParenthesized: is_parenthesized,
-			Comment:         v.copyComment(o.Comment),
-		})
+		newel := &OptionElement{
+			Parent:            v.scope,
+			Name:              oname,
+			Value:             Literal{o.Constant.Source, o.Constant.IsString},
+			ParenthesizedName: parenthesizedName,
+			Comment:           v.copyComment(o.Comment),
+		}
+		if o.AggregatedConstants != nil && len(o.AggregatedConstants) > 0 {
+			newel.AggregatedValues = make(map[string]Literal)
+			for _, ac := range o.AggregatedConstants {
+				newel.AggregatedValues[ac.Name] = Literal{ac.Source, ac.IsString}
+			}
+		}
+
+		el.addOptionElement(newel)
 	} else {
 		v.errInvalidScope("public dependency", o.Name)
 	}

@@ -131,7 +131,7 @@ func (fd *FileDep) IsSamePackage(filedep *FileDep) bool {
 func (fd *FileDep) GoPackage() string {
 	for _, o := range fd.ProtoFile.Options {
 		if o.Name == "go_package" {
-			return o.Value
+			return o.Value.String()
 		}
 	}
 	return path.Dir(fd.ProtoFile.PackageName)
