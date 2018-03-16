@@ -151,11 +151,7 @@ func (v *visitor) VisitOption(o *proto.Option) {
 			pparse := strings.Split(oname, ")")
 
 			parenthesizedName = pparse[0][1:]
-			oname = parenthesizedName
-			if len(pparse) > 1 {
-				// rebuild string
-				oname += strings.Join(pparse[1:], ")")
-			}
+			oname = parenthesizedName + strings.Join(pparse[1:], ")") // keeps more parenthesis if available
 		}
 
 		newel := &OptionElement{

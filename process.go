@@ -84,7 +84,9 @@ func (f *ProtoFile) FindName(name string) []FProtoElement {
 
 	// items that can nest
 	for _, el := range f.Messages {
-		if el.Name == nfirst {
+		if el.IsExtend && el.Name == name {
+			ret = append(ret, el)
+		} else if el.Name == nfirst {
 			if nrest != "" {
 				elr := el.FindName(nrest)
 				if len(elr) > 0 {

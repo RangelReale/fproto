@@ -29,15 +29,26 @@ type DepType struct {
 	Item fproto.FProtoElement
 }
 
-// Creates a new DepType from a file's element.
-func NewDepTypeFromElement(filedep *FileDep, element fproto.FProtoElement) *DepType {
+func NewDepType(filedep *FileDep, alias string, originalAlias string, name string, item fproto.FProtoElement) *DepType {
 	return &DepType{
 		FileDep:       filedep,
-		Alias:         filedep.OriginalAlias(),
-		OriginalAlias: filedep.OriginalAlias(),
-		Name:          fproto.ScopedName(element),
-		Item:          element,
+		Alias:         alias,
+		OriginalAlias: originalAlias,
+		Name:          name,
+		Item:          item,
 	}
+}
+
+func NewDepTypeScalar(scalarType fproto.ScalarType) *DepType {
+	return &DepType{
+		Name:       scalarType.ProtoType(),
+		ScalarType: &scalarType,
+	}
+}
+
+// Creates a new DepType from a file's element.
+func NewDepTypeFromElement(filedep *FileDep, element fproto.FProtoElement) *DepType {
+	return NewDepType(filedep, filedep.OriginalAlias(), filedep.OriginalAlias(), fproto.ScopedName(element), element)
 }
 
 // Returns the name plus alias, if available
@@ -121,4 +132,18 @@ func (d *DepType) GetTypes(name string) ([]*DepType, error) {
 
 	// if not found, search in the current item scope
 	return d.FileDep.GetTypes(fmt.Sprintf("%s.%s", d.Name, name))
+}
+
+func (d *DepType) ExtensionPackages() []string {
+	if d.FileDep != nil {
+		return d.FileDep.Dep.GetExtensions(d.FileDep, d.OriginalAlias, d.Name)
+	}
+	return nil
+}
+
+func (d *DepType) GetTypeExtension(extensionPkg string) (*DepType, error) {
+	if d.FileDep != nil {
+		return d.FileDep.Dep.GetTypeExtension(d.FullOriginalName(), extensionPkg)
+	}
+	return nil, nil
 }
