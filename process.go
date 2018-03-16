@@ -102,7 +102,7 @@ func (f *ProtoFile) FindName(name string) []FProtoElement {
 // Finds an option by name.
 func (f *ProtoFile) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
-		if o.Name == name {
+		if o.Name == name || o.ParenthesizedName == name {
 			return o
 		}
 	}
@@ -189,7 +189,7 @@ func (f *MessageElement) FindName(name string) []FProtoElement {
 // Finds an option by name.
 func (f *MessageElement) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
-		if o.Name == name {
+		if o.Name == name || o.ParenthesizedName == name {
 			return o
 		}
 	}
@@ -227,7 +227,7 @@ func (f *MessageElement) CollectMessages() []FProtoElement {
 
 // Finds an option by name.
 func (f *OptionElement) FindOption(name string) *OptionElement {
-	if f.Name == name {
+	if f.Name == name || f.ParenthesizedName == name {
 		return f
 	}
 	return nil
@@ -239,7 +239,7 @@ func (f *OptionElement) FindOption(name string) *OptionElement {
 
 func (f *EnumConstantElement) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
-		if o.Name == name {
+		if o.Name == name || o.ParenthesizedName == name {
 			return o
 		}
 	}
@@ -252,7 +252,7 @@ func (f *EnumConstantElement) FindOption(name string) *OptionElement {
 
 func (f *EnumElement) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
-		if o.Name == name {
+		if o.Name == name || o.ParenthesizedName == name {
 			return o
 		}
 	}
@@ -265,7 +265,7 @@ func (f *EnumElement) FindOption(name string) *OptionElement {
 
 func (f *RPCElement) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
-		if o.Name == name {
+		if o.Name == name || o.ParenthesizedName == name {
 			return o
 		}
 	}
@@ -278,7 +278,7 @@ func (f *RPCElement) FindOption(name string) *OptionElement {
 
 func (f *ServiceElement) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
-		if o.Name == name {
+		if o.Name == name || o.ParenthesizedName == name {
 			return o
 		}
 	}
@@ -291,7 +291,7 @@ func (f *ServiceElement) FindOption(name string) *OptionElement {
 
 func (f *FieldElement) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
-		if o.Name == name {
+		if o.Name == name || o.ParenthesizedName == name {
 			return o
 		}
 	}
@@ -304,7 +304,7 @@ func (f *FieldElement) FindOption(name string) *OptionElement {
 
 func (f *MapFieldElement) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
-		if o.Name == name {
+		if o.Name == name || o.ParenthesizedName == name {
 			return o
 		}
 	}
@@ -317,7 +317,7 @@ func (f *MapFieldElement) FindOption(name string) *OptionElement {
 
 func (f *OneofFieldElement) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
-		if o.Name == name {
+		if o.Name == name || o.ParenthesizedName == name {
 			return o
 		}
 	}
