@@ -90,6 +90,14 @@ func (fd *FileDep) GetTypes(name string) ([]*DepType, error) {
 	return nil, nil
 }
 
+func (fd *FileDep) GetFileOfName(name string) (*FileDep, error) {
+	return fd.Dep.GetFileOfName(name)
+}
+
+func (fd *FileDep) GetFilesOfName(name string) ([]*FileDep, error) {
+	return fd.Dep.GetFilesOfName(name)
+}
+
 // Checks if the passed FileDep refers to the same file as this one.
 func (fd *FileDep) IsSame(filedep *FileDep) bool {
 	if filedep == nil {

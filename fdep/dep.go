@@ -341,8 +341,8 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 
 // Gets a file of a name. Try all package names until a file is found.
 // The type itself that may be on the name is ignored.
-func (d *Dep) GetFile(name string) (*FileDep, error) {
-	t, err := d.GetFiles(name)
+func (d *Dep) GetFileOfName(name string) (*FileDep, error) {
+	t, err := d.internalGetFilesOfName(name, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -356,9 +356,13 @@ func (d *Dep) GetFile(name string) (*FileDep, error) {
 	return t[0], nil
 }
 
+func (d *Dep) GetFilesOfName(name string) ([]*FileDep, error) {
+	return d.internalGetFilesOfName(name, nil)
+}
+
 // Gets the files of a name. Try all package names until a file is found.
 // The type itself that may be on the name is ignored.
-func (d *Dep) GetFiles(name string) ([]*FileDep, error) {
+func (d *Dep) internalGetFilesOfName(name string, filedep *FileDep) ([]*FileDep, error) {
 	// builds a list of possible package names from the dotted name.
 	// for example, if name = "google.protobuf.Empty", this will search for
 	// package "google", then "google.protobuf", but only "google.protobuf" will
@@ -384,16 +388,36 @@ func (d *Dep) GetFiles(name string) ([]*FileDep, error) {
 	found := make(map[string]*FileDep)
 
 	// Loop into the found packages.
-	for sppkg, spname := range pkgs {
+	for sppkg, _ := range pkgs {
 		// Loop into the files of these packages.
 		for _, f := range d.Packages[sppkg] {
-			if spname == "" {
-				found[f] = d.Files[f]
-			} else {
-				// Search the name on the current proto file.
-				if len(d.Files[f].ProtoFile.FindName(spname)) > 0 {
-					found[f] = d.Files[f]
+			include_file := false
+
+			if filedep != nil {
+				// If a file was passed, only check on the dependencies of the file.
+				for _, ffdep := range filedep.ProtoFile.Dependencies {
+					if ffdep == f {
+						include_file = true
+						break
+					}
 				}
+			} else {
+				// Else check all files
+				include_file = true
+			}
+
+			if include_file {
+				found[f] = d.Files[f]
+				/*
+					if spname == "" {
+						found[f] = d.Files[f]
+					} else {
+						// Search the name on the current proto file.
+						if len(d.Files[f].ProtoFile.FindName(spname)) > 0 {
+							found[f] = d.Files[f]
+						}
+					}
+				*/
 			}
 		}
 	}
