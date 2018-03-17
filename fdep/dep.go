@@ -341,7 +341,7 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 
 // Gets a file of a name. Try all package names until a file is found.
 // The type itself that may be on the name is ignored.
-func (d *Dep) GetFileOfName(name string) (*FileDep, error) {
+func (d *Dep) GetFileOfName(name string) (*FileDepOfName, error) {
 	t, err := d.internalGetFilesOfName(name, nil)
 	if err != nil {
 		return nil, err
@@ -356,13 +356,13 @@ func (d *Dep) GetFileOfName(name string) (*FileDep, error) {
 	return t[0], nil
 }
 
-func (d *Dep) GetFilesOfName(name string) ([]*FileDep, error) {
+func (d *Dep) GetFilesOfName(name string) ([]*FileDepOfName, error) {
 	return d.internalGetFilesOfName(name, nil)
 }
 
 // Gets the files of a name. Try all package names until a file is found.
 // The type itself that may be on the name is ignored.
-func (d *Dep) internalGetFilesOfName(name string, filedep *FileDep) ([]*FileDep, error) {
+func (d *Dep) internalGetFilesOfName(name string, filedep *FileDep) ([]*FileDepOfName, error) {
 	// builds a list of possible package names from the dotted name.
 	// for example, if name = "google.protobuf.Empty", this will search for
 	// package "google", then "google.protobuf", but only "google.protobuf" will
@@ -385,10 +385,10 @@ func (d *Dep) internalGetFilesOfName(name string, filedep *FileDep) ([]*FileDep,
 		return nil, nil
 	}
 
-	found := make(map[string]*FileDep)
+	found := make(map[string]*FileDepOfName)
 
 	// Loop into the found packages.
-	for sppkg, _ := range pkgs {
+	for sppkg, spname := range pkgs {
 		// Loop into the files of these packages.
 		for _, f := range d.Packages[sppkg] {
 			include_file := false
@@ -407,23 +407,17 @@ func (d *Dep) internalGetFilesOfName(name string, filedep *FileDep) ([]*FileDep,
 			}
 
 			if include_file {
-				found[f] = d.Files[f]
-				/*
-					if spname == "" {
-						found[f] = d.Files[f]
-					} else {
-						// Search the name on the current proto file.
-						if len(d.Files[f].ProtoFile.FindName(spname)) > 0 {
-							found[f] = d.Files[f]
-						}
-					}
-				*/
+				found[f] = &FileDepOfName{
+					FileDep: d.Files[f],
+					Package: sppkg,
+					Name:    spname,
+				}
 			}
 		}
 	}
 
 	// build response
-	var ret []*FileDep
+	var ret []*FileDepOfName
 	for _, fd := range found {
 		ret = append(ret, fd)
 	}
@@ -447,4 +441,83 @@ func (d *Dep) GetExtensions(filedep *FileDep, originalAlias string, name string)
 	}
 
 	return ret
+}
+
+func (d *Dep) GetOption(optionItem OptionItem, name string) (*OptionType, error) {
+	t, err := d.internalGetOptions(optionItem, name, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(t) > 1 {
+		return nil, fmt.Errorf("More than one option found for '%s'", name)
+	} else if len(t) == 0 {
+		return nil, nil
+	}
+
+	return t[0], nil
+}
+
+func (d *Dep) GetOptions(optionItem OptionItem, name string) ([]*OptionType, error) {
+	return d.internalGetOptions(optionItem, name, nil)
+}
+
+func (d *Dep) internalGetOptions(optionItem OptionItem, name string, filedep *FileDep) ([]*OptionType, error) {
+	// Get packages of passed name
+	depnames, err := d.internalGetFilesOfName(name, filedep)
+	if err != nil {
+		return nil, err
+	}
+
+	// find the source type from descriptor.proto
+	srcTypeName := optionItem.StructName()
+
+	sourceType, err := d.GetType(srcTypeName)
+	if err != nil {
+		return nil, fmt.Errorf("Error gettint the source type '%s': %v", srcTypeName, err)
+	}
+
+	var ret []*OptionType
+	for _, dn := range depnames {
+		// checks if there is an extension message of the source type in the root of the proto file
+		for _, m := range dn.FileDep.ProtoFile.Messages {
+			if m.IsExtend && m.Name == srcTypeName {
+				include_file := false
+
+				if dn.Name != "" {
+					// checks if the message has the firt part of the name
+					fld, _ := m.FindFieldPartial(dn.Name)
+					if fld != nil {
+						include_file = true
+					}
+				} else {
+					include_file = true
+				}
+
+				if include_file {
+					ret = append(ret, &OptionType{
+						SourceOption: sourceType,
+						Option:       NewDepTypeFromElement(dn.FileDep, m),
+						OptionItem:   optionItem,
+						Name:         dn.Name,
+					})
+				}
+			}
+		}
+	}
+
+	if len(ret) == 0 {
+		// check if the field isn't on the core type
+		fld, _ := sourceType.Item.(*fproto.MessageElement).FindFieldPartial(name)
+		if fld != nil {
+			ret = append(ret, &OptionType{
+				SourceOption: sourceType,
+				Option:       nil,
+				OptionItem:   optionItem,
+				Name:         name,
+			})
+		}
+	}
+
+	return ret, nil
 }

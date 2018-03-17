@@ -90,11 +90,11 @@ func (fd *FileDep) GetTypes(name string) ([]*DepType, error) {
 	return nil, nil
 }
 
-func (fd *FileDep) GetFileOfName(name string) (*FileDep, error) {
+func (fd *FileDep) GetFileOfName(name string) (*FileDepOfName, error) {
 	return fd.Dep.GetFileOfName(name)
 }
 
-func (fd *FileDep) GetFilesOfName(name string) ([]*FileDep, error) {
+func (fd *FileDep) GetFilesOfName(name string) ([]*FileDepOfName, error) {
 	return fd.Dep.GetFilesOfName(name)
 }
 
@@ -143,4 +143,10 @@ func (fd *FileDep) GoPackage() string {
 		}
 	}
 	return path.Dir(fd.ProtoFile.PackageName)
+}
+
+type FileDepOfName struct {
+	FileDep *FileDep
+	Package string
+	Name    string
 }

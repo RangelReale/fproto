@@ -198,6 +198,28 @@ func (f *MessageElement) FindOption(name string) *OptionElement {
 	return nil
 }
 
+// Finds a field by name.
+func (f *MessageElement) FindField(name string) FieldElementTag {
+	for _, f := range f.Fields {
+		if f.FieldName() == name {
+			return f
+		}
+	}
+	return nil
+}
+
+// Find a field by name using the first part of the dotted name.
+func (f *MessageElement) FindFieldPartial(name string) (fld FieldElementTag, rest string) {
+	nfirst, nrest := NameSplit(name)
+
+	for _, f := range f.Fields {
+		if f.FieldName() == nfirst {
+			return f, nrest
+		}
+	}
+	return nil, ""
+}
+
 func (f *MessageElement) CollectEnums() []FProtoElement {
 	var ret []FProtoElement
 
