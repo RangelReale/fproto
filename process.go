@@ -56,6 +56,14 @@ func ScopedAliasList(element FProtoElement) []string {
 	return ReverseStr(ret)
 }
 
+func GetRootElement(element FProtoElement) FProtoElement {
+	cur := element
+	for cur.ParentElement() != nil {
+		cur = cur.ParentElement()
+	}
+	return cur
+}
+
 //
 // PROCESS: ProtoFile
 //

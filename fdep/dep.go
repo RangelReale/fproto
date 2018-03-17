@@ -53,6 +53,28 @@ func (d *Dep) AddIncludeDir(dir string) error {
 	return nil
 }
 
+func (d *Dep) FileDepFromProtofile(pfile *fproto.ProtoFile) *FileDep {
+	for _, fd := range d.Files {
+		if fd.ProtoFile == pfile {
+			return fd
+		}
+	}
+	return nil
+}
+
+func (d *Dep) DepTypeFromElement(element fproto.FProtoElement) *DepType {
+	root := fproto.GetRootElement(element)
+	if root != nil {
+		if fl, ok := root.(*fproto.ProtoFile); ok {
+			fd := d.FileDepFromProtofile(fl)
+			if fd != nil {
+				return NewDepTypeFromElement(fd, element)
+			}
+		}
+	}
+	return nil
+}
+
 // Add files from one directory recursively, assuming this is a .protobuf root path.
 // Ex: dep.AddPath("/protoc-3.5.1/include", fdep.DepType_Imported)
 // This will add files from google/protobuf directory.
