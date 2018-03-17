@@ -52,6 +52,28 @@ func NewDepTypeFromElement(filedep *FileDep, element fproto.FProtoElement) *DepT
 }
 
 // Returns the name plus alias, if available
+func (d *DepType) IsSame(od *DepType) bool {
+	if d.IsScalar() != od.IsScalar() ||
+		(d.IsScalar() && od.IsScalar() && *d.ScalarType != *od.ScalarType) {
+		return false
+	}
+
+	if d.FileDep == nil || od.FileDep == nil {
+		return false
+	}
+
+	if d.FileDep.FilePath != od.FileDep.FilePath {
+		return false
+	}
+
+	if d.OriginalAlias != od.OriginalAlias || d.Name != od.Name {
+		return false
+	}
+
+	return true
+}
+
+// Returns the name plus alias, if available
 func (d *DepType) FullName() string {
 	if d.Alias != "" {
 		return fmt.Sprintf("%s.%s", d.Alias, d.Name)

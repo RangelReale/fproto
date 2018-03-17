@@ -145,13 +145,15 @@ func (v *visitor) VisitOption(o *proto.Option) {
 
 	if el, ok := v.scope.(iAddOption); ok {
 		oname := o.Name
-		parenthesizedName := ""
+		parenthesizedName := o.Name
+		ispar := false
 
 		if strings.HasPrefix(oname, "(") {
 			pparse := strings.Split(oname, ")")
 
 			parenthesizedName = pparse[0][1:]
 			oname = parenthesizedName + strings.Join(pparse[1:], ")") // keeps more parenthesis if available
+			ispar = true
 		}
 
 		newel := &OptionElement{
@@ -159,6 +161,7 @@ func (v *visitor) VisitOption(o *proto.Option) {
 			Name:              oname,
 			Value:             Literal{o.Constant.Source, o.Constant.IsString},
 			ParenthesizedName: parenthesizedName,
+			IsParenthesized:   ispar,
 			Comment:           v.copyComment(o.Comment),
 		}
 		if o.AggregatedConstants != nil && len(o.AggregatedConstants) > 0 {

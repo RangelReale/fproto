@@ -41,6 +41,7 @@ type OptionElement struct {
 	Parent            FProtoElement
 	Name              string
 	ParenthesizedName string
+	IsParenthesized   bool
 	Value             Literal
 	AggregatedValues  map[string]Literal
 	Comment           *Comment
