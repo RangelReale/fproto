@@ -261,6 +261,18 @@ func (d *Dep) GetType(name string) (*DepType, error) {
 	return t[0], nil
 }
 
+// Like GetType, but returns an error if not found
+func (d *Dep) MustGetType(name string) (*DepType, error) {
+	t, err := d.GetType(name)
+	if err != nil {
+		return nil, err
+	}
+	if t == nil {
+		return nil, fmt.Errorf("Type %s not found", name)
+	}
+	return t, nil
+}
+
 // Gets an extensions for a type from a source package
 func (d *Dep) GetTypeExtension(name string, extensionPkg string) (*DepType, error) {
 	t, err := d.GetType(name)
@@ -300,7 +312,12 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 	// locate the name into the own filedep
 	if filedep != nil {
 		for _, t := range filedep.ProtoFile.FindName(name) {
-			ret = append(ret, NewDepType(filedep, "", filedep.OriginalAlias(), name, t))
+			switch t.(type) {
+			case fproto.FieldElementTag:
+				// ignore fields
+			default:
+				ret = append(ret, NewDepType(filedep, "", filedep.OriginalAlias(), name, t))
+			}
 		}
 	}
 

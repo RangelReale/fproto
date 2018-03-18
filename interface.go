@@ -7,6 +7,7 @@ package fproto
 type FProtoElement interface {
 	FProtoElement()
 	ElementName() string
+	ElementTypeName() string
 	ParentElement() FProtoElement
 	FindOption(name string) *OptionElement
 }

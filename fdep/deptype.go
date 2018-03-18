@@ -134,6 +134,18 @@ func (d *DepType) GetType(name string) (*DepType, error) {
 	return t[0], nil
 }
 
+// Like GetType, but returns an error if not found
+func (d *DepType) MustGetType(name string) (*DepType, error) {
+	t, err := d.GetType(name)
+	if err != nil {
+		return nil, err
+	}
+	if t == nil {
+		return nil, fmt.Errorf("Type %s not found in %s", name, d.FullOriginalName())
+	}
+	return t, nil
+}
+
 // Returns all named types from the dependency, in relation to the current type.
 //
 // Use this method if there is a possibility that one name resolves to more than one type.

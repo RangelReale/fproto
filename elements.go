@@ -271,3 +271,16 @@ func (e *ExtensionsElement) ElementName() string    { return "" }
 func (e *ReservedRangeElement) ElementName() string { return "" }
 func (e *MessageElement) ElementName() string       { return e.Name }
 func (e *ProtoFile) ElementName() string            { return "" }
+
+func (e *OptionElement) ElementTypeName() string        { return "OPTION" }
+func (e *EnumConstantElement) ElementTypeName() string  { return "ENUM CONSTANT" }
+func (e *EnumElement) ElementTypeName() string          { return "ENUM" }
+func (e *RPCElement) ElementTypeName() string           { return "RPC" }
+func (e *ServiceElement) ElementTypeName() string       { return "SERVICE" }
+func (e *FieldElement) ElementTypeName() string         { return "FIELD" }
+func (e *MapFieldElement) ElementTypeName() string      { return "MAP FIELD" }
+func (e *OneofFieldElement) ElementTypeName() string    { return "ONEOF FIELD" }
+func (e *ExtensionsElement) ElementTypeName() string    { return "EXTENSION" }
+func (e *ReservedRangeElement) ElementTypeName() string { return "RESERVED RANGE" }
+func (e *MessageElement) ElementTypeName() string       { return "MESSAGE" }
+func (e *ProtoFile) ElementTypeName() string            { return "PROTO FILE" }
