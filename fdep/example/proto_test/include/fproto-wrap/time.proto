@@ -1,0 +1,9 @@
+syntax = "proto3";
+package fproto_wrap;
+
+import "google/protobuf/timestamp.proto";
+
+message NullTime {
+    google.protobuf.Timestamp value = 1;
+    bool valid = 2;
+}

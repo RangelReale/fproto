@@ -1,0 +1,26 @@
+syntax = "proto3";
+package app.base;
+
+//
+// Pagination request.
+//
+message PaginationRequest {
+    // Page to request.
+    int32 page = 1;
+    // Amount of items per page to request. If 0, disables pagination.
+    int32 page_size = 2;
+}
+
+//
+// Pagination response.
+//
+message PaginationResponse {
+    // The page in the response
+    int32 page = 1;
+    // The amount per page used on the response.
+    int32 page_size = 2;
+    // The amount of pages available. If unknown, returns -1.
+    int32 page_count = 3;
+    // The amount of items available. If unknown, returns -1.
+    int32 total_count = 4;
+}

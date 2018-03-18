@@ -8,6 +8,7 @@ import (
 func TestDep(t *testing.T) {
 
 	dep := NewDep()
+	dep.IgnoreNotFoundDependencies = true
 	err := dep.AddReader("myapp/proto/p_user/user.proto", strings.NewReader(testfile_user), DepType_Own)
 	if err != nil {
 		t.Fatalf("Error parsing test user proto: %v", err)

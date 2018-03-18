@@ -1,0 +1,82 @@
+syntax = "proto3";
+package app.core;
+
+import "app/base/pagination.proto";
+import "fproto-wrap/uuid.proto";
+import "google/protobuf/empty.proto";
+
+//
+// User service.
+//
+service UserSvc {
+    // List all users.
+    rpc List(UserListRequest) returns (UserListResponse);
+    // Get a single user.
+    rpc Get(UserIdRequest) returns (UserResponse);
+    // Add a new user.
+    rpc Add(UserRequest) returns (UserIdResponse);
+    // Modify an existing user.
+    rpc Modify(UserRequest) returns (google.protobuf.Empty);
+    // Delete an user.
+    rpc Delete(UserIdRequest) returns (google.protobuf.Empty);
+}
+
+//
+// MODELS
+//
+
+// User information
+message User {
+    // User id
+    fproto_wrap.UUID user_id = 1;
+    // User name
+    string name = 2;
+    // User email
+    string email = 3;
+}
+
+//
+// REQUESTS
+//
+
+// Request for a list of users.
+message UserListRequest {
+    // Pagination request
+    app.base.PaginationRequest pagination = 1;
+}
+
+// Request sending an user.
+message UserRequest {
+    // User id
+    User user = 1;
+}
+
+// Request for an user by id.
+message UserIdRequest {
+    // User id
+    fproto_wrap.UUID user_id = 1;
+}
+
+//
+// RESPONSES
+//
+
+// Returns a list of users.
+message UserListResponse {
+    // List of users
+    repeated User list = 1;
+    // Pagination response
+    app.base.PaginationResponse pagination = 10;
+}
+
+// Returns a single user.
+message UserResponse {
+    // User to return
+    User user = 1;
+}
+
+// Returns an user id.
+message UserIdResponse {
+    // User id
+    fproto_wrap.UUID user_id = 1;
+}

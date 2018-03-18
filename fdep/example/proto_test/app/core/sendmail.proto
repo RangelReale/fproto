@@ -1,0 +1,159 @@
+syntax = "proto3";
+package app.core;
+
+import "fproto-wrap/uuid.proto";
+import "fproto-wrap/time.proto";
+import "fproto-wrap/jsontag.proto";
+import "fproto-wrap-headers/headers.proto";
+import "google/protobuf/empty.proto";
+
+//
+// Email sending service.
+//
+service SendMailSvc {
+    // Get a request to send email.
+    rpc Get(SendMailGetRequest) returns (SendMailResponse);
+    // Send a request to send email.
+    rpc Send(SendMailSendRequest) returns (SendMailIdResponse);
+    // Cancel a previously requested email sending.
+    rpc Cancel(SendMailIdRequest) returns (google.protobuf.Empty);
+}
+
+//
+// MODELS
+//
+
+// Destination to send email
+message SendMailDestination {
+    // Email
+    string email = 1;
+    // Name (optional)
+    string name = 2;
+}
+
+// Email attachment
+message SendMailAttach {
+    enum attach_type {
+        AT_ATTACHMENT = 0;
+        AT_INLINE = 1;
+    }
+
+    // Attach type
+    attach_type attach_type = 1;
+    // Content type
+    string content_type = 2;
+    // Extra headers
+    fproto_wrap_headers.Headers headers = 3;
+    // Filename in attachment
+    string filename = 4;
+    // download url or byte content
+    oneof content_opt {
+        string download_url = 5;
+        bytes content = 6;
+    }
+}
+
+// Sendmail information
+message SendMail {
+    // Send mail id
+    fproto_wrap.UUID sendmail_id = 1;
+    // Whether the email was sent. If empty, it is still on the queue.
+    oneof sent_opt {
+        bool sent = 2;
+    }
+    // Tries to send the email
+    int32 tries = 3;
+    // Error message if sent = false.
+    string error_message = 4;
+    // Time of last try
+    fproto_wrap.NullTime last_try_at = 5;
+
+    // "To" destinations
+    repeated SendMailDestination destination_to = 10;
+    // "CC" destinations
+    repeated SendMailDestination destination_cc = 11;
+    // "BCC" destinations
+    repeated SendMailDestination destination_bcc = 12;
+    // Subject
+    string subject = 13;
+
+    message Body {
+        // Body in text format (optional)
+        string body_text = 1;
+        // Body in html format (optional)
+        string body_html = 2;
+    }
+
+    // Body
+    Body body = 14 [(fproto_wrap.jsontag).tag_disable = true];
+
+    // List of attachments
+    repeated SendMailAttach attach = 15;
+}
+
+// Send email request
+message SendMailSend {
+    // "To" destinations
+    repeated SendMailDestination destination_to = 10;
+    // "CC" destinations
+    repeated SendMailDestination destination_cc = 11;
+    // "BCC" destinations
+    repeated SendMailDestination destination_bcc = 12;
+    // Subject
+    string subject = 13;
+
+    message Body {
+        // Body in text format (optional)
+        string body_text = 1;
+        // Body in html format (optional)
+        string body_html = 2;
+    }
+
+    // Body
+    Body body = 14;
+
+    // List of attachments
+    repeated SendMailAttach attach = 15;
+}
+
+//
+// REQUESTS
+//
+
+// Request of a single sendmail information
+message SendMailGetRequest {
+    // Sendmail id
+    fproto_wrap.UUID sendmail_id = 1;
+    // Whether the body should be returned
+    bool body = 2;
+    // Whether the attachments should be returned
+    bool attach = 3;
+}
+
+// Request the queueing of an email to send
+message SendMailSendRequest {
+    // Email to send
+    SendMailSend mail = 1;
+}
+
+// Request of a sendmail information by id.
+message SendMailIdRequest {
+    // Sendmail id
+    fproto_wrap.UUID sendmail_id = 1;
+}
+
+//
+// RESPONSES
+//
+
+// Returns a sendmail information
+message SendMailResponse {
+    // Sendmail information
+    SendMail mail = 1;
+}
+
+// Returns a sendmail queue id.
+message SendMailIdResponse {
+    // Sendmail id
+    fproto_wrap.UUID sendmail_id = 1;
+}

@@ -1,0 +1,13 @@
+syntax = "proto3";
+package fproto_wrap;
+
+import "google/protobuf/descriptor.proto";
+
+message JSONTag {
+    bool tag_disable = 1;
+    string tag_fieldname = 2;
+}
+
+extend google.protobuf.FieldOptions {
+    JSONTag jsontag = 6700;
+}

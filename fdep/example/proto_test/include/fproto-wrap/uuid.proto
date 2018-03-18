@@ -1,0 +1,11 @@
+syntax = "proto3";
+package fproto_wrap;
+
+message UUID {
+    string value = 1;
+}
+
+message NullUUID {
+    string value = 1;
+    bool valid = 2;
+}

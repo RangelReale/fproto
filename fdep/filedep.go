@@ -19,6 +19,17 @@ const (
 	DepType_Imported
 )
 
+func (dt FileDepType) String() string {
+	switch dt {
+	case DepType_Own:
+		return "OWN"
+	case DepType_Imported:
+		return "IMPORTED"
+	default:
+		return "UNKNOWN"
+	}
+}
+
 // FileDep represents one .proto file into the dependency.
 type FileDep struct {
 	// The INTERNAL path of the .proto file, for example "google/protobuf/empty.proto"
