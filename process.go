@@ -154,6 +154,16 @@ func (f *ProtoFile) CollectServices() []FProtoElement {
 	return ret
 }
 
+func (f *ProtoFile) CollectFields() []FProtoElement {
+	var ret []FProtoElement
+
+	for _, el := range f.Messages {
+		ret = append(ret, el.CollectFields()...)
+	}
+
+	return ret
+}
+
 //
 // PROCESS: MessageElement
 //
@@ -248,6 +258,25 @@ func (f *MessageElement) CollectMessages() []FProtoElement {
 	for _, el := range f.Messages {
 		ret = append(ret, el)
 		ret = append(ret, el.CollectMessages()...)
+	}
+
+	return ret
+}
+
+func (f *MessageElement) CollectFields() []FProtoElement {
+	var ret []FProtoElement
+
+	for _, fld := range f.Fields {
+		ret = append(ret, fld)
+
+		switch xfld := fld.(type) {
+		case *OneOfFieldElement:
+			ret = append(ret, xfld.CollectFields()...)
+		}
+	}
+
+	for _, el := range f.Messages {
+		ret = append(ret, el.CollectFields()...)
 	}
 
 	return ret
@@ -354,6 +383,21 @@ func (f *OneOfFieldElement) FindOption(name string) *OptionElement {
 		}
 	}
 	return nil
+}
+
+func (f *OneOfFieldElement) CollectFields() []FProtoElement {
+	var ret []FProtoElement
+
+	for _, fld := range f.Fields {
+		ret = append(ret, fld)
+
+		switch xfld := fld.(type) {
+		case *OneOfFieldElement:
+			ret = append(ret, xfld.CollectFields()...)
+		}
+	}
+
+	return ret
 }
 
 //
