@@ -156,8 +156,12 @@ func (fd *FileDep) GoPackage() string {
 	return path.Dir(fd.ProtoFile.PackageName)
 }
 
+// Result of GetFilesOfName
 type FileDepOfName struct {
+	// File
 	FileDep *FileDep
+	// Package name
 	Package string
-	Name    string
+	// Rest of name excluding the package name
+	Name string
 }

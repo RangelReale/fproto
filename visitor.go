@@ -317,7 +317,7 @@ func (v *visitor) VisitOneof(o *proto.Oneof) {
 	}
 
 	// create oneof
-	newo := &OneofFieldElement{
+	newo := &OneOfFieldElement{
 		Parent:  v.scope,
 		Name:    o.Name,
 		Comment: v.copyComment(o.Comment),

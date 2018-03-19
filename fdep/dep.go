@@ -53,6 +53,7 @@ func (d *Dep) AddIncludeDir(dir string) error {
 	return nil
 }
 
+// Returns a FileDep given a ProtoFile
 func (d *Dep) FileDepFromProtofile(pfile *fproto.ProtoFile) *FileDep {
 	for _, fd := range d.Files {
 		if fd.ProtoFile == pfile {
@@ -62,15 +63,20 @@ func (d *Dep) FileDepFromProtofile(pfile *fproto.ProtoFile) *FileDep {
 	return nil
 }
 
-func (d *Dep) DepTypeFromElement(element fproto.FProtoElement) *DepType {
+// Returns a FileDep given an fproto element
+func (d *Dep) FileDepFromElement(element fproto.FProtoElement) *FileDep {
 	root := fproto.GetRootElement(element)
-	if root != nil {
-		if fl, ok := root.(*fproto.ProtoFile); ok {
-			fd := d.FileDepFromProtofile(fl)
-			if fd != nil {
-				return NewDepTypeFromElement(fd, element)
-			}
-		}
+	if pfile, pfileok := root.(*fproto.ProtoFile); pfileok {
+		return d.FileDepFromProtofile(pfile)
+	}
+	return nil
+}
+
+// Returns a DepType given an fproto element
+func (d *Dep) DepTypeFromElement(element fproto.FProtoElement) *DepType {
+	fd := d.FileDepFromElement(element)
+	if fd != nil {
+		return NewDepTypeFromElement(fd, element)
 	}
 	return nil
 }
@@ -242,6 +248,28 @@ func (d *Dep) addMessageExtensions(prfile *fproto.ProtoFile, messages []*fproto.
 	}
 }
 
+// Builds a list of valid package names from the dotted name.
+// for example, if name = "google.protobuf.Empty", this will search for
+// package "google", then "google.protobuf", but only "google.protobuf" will
+// be found and added to the list.
+//
+// The map item value will contain the rest of the type name, in the example case,
+// "Empty". It can also contain dots in case of nested items.
+func (d *Dep) FindPackagesOfName(name string) map[string]string {
+	pkgs := make(map[string]string)
+
+	nameparts := strings.Split(name, ".")
+
+	for nameidx, _ := range nameparts {
+		p := strings.Join(nameparts[:nameidx], ".")
+		if _, ok := d.Packages[p]; ok {
+			pkgs[p] = strings.Join(nameparts[nameidx:], ".")
+		}
+	}
+
+	return pkgs
+}
+
 // Returns one named type from the dependency.
 //
 // If multiple types are found for the same name, an error is issued.
@@ -321,23 +349,7 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 		}
 	}
 
-	// builds a list of possible package names from the dotted name.
-	// for example, if name = "google.protobuf.Empty", this will search for
-	// package "google", then "google.protobuf", but only "google.protobuf" will
-	// be found and added to the list.
-	//
-	// The map item value will contain the rest of the type name, in the example case,
-	// "Empty". It can also contain dots in case of nested items.
-	pkgs := make(map[string]string)
-
-	sp := strings.Split(name, ".")
-
-	for spi, _ := range sp {
-		p := strings.Join(sp[:spi], ".")
-		if _, ok := d.Packages[p]; ok {
-			pkgs[p] = strings.Join(sp[spi:], ".")
-		}
-	}
+	pkgs := d.FindPackagesOfName(name)
 
 	if len(pkgs) == 0 {
 		if len(ret) > 0 {
@@ -380,6 +392,10 @@ func (d *Dep) internalGetTypes(name string, filedep *FileDep) ([]*DepType, error
 
 // Gets a file of a name. Try all package names until a file is found.
 // The type itself that may be on the name is ignored.
+// For example, GetFilesOfName("google.protobuf.Empty") returns:
+//		FileDep: *FileDep{"google/protobuf/empty.proto"}
+//		Package: google.protobuf
+//		Name: Empty
 func (d *Dep) GetFileOfName(name string) (*FileDepOfName, error) {
 	t, err := d.internalGetFilesOfName(name, nil)
 	if err != nil {
@@ -395,6 +411,8 @@ func (d *Dep) GetFileOfName(name string) (*FileDepOfName, error) {
 	return t[0], nil
 }
 
+// Gets the files of a name. Try all package names until a file is found.
+// The type itself that may be on the name is ignored.
 func (d *Dep) GetFilesOfName(name string) ([]*FileDepOfName, error) {
 	return d.internalGetFilesOfName(name, nil)
 }
@@ -402,23 +420,7 @@ func (d *Dep) GetFilesOfName(name string) ([]*FileDepOfName, error) {
 // Gets the files of a name. Try all package names until a file is found.
 // The type itself that may be on the name is ignored.
 func (d *Dep) internalGetFilesOfName(name string, filedep *FileDep) ([]*FileDepOfName, error) {
-	// builds a list of possible package names from the dotted name.
-	// for example, if name = "google.protobuf.Empty", this will search for
-	// package "google", then "google.protobuf", but only "google.protobuf" will
-	// be found and added to the list.
-	//
-	// The map item value will contain the rest of the type name, in the example case,
-	// "Empty". It can also contain dots in case of nested items.
-	pkgs := make(map[string]string)
-
-	sp := strings.Split(name, ".")
-
-	for spi, _ := range sp {
-		p := strings.Join(sp[:spi], ".")
-		if _, ok := d.Packages[p]; ok {
-			pkgs[p] = strings.Join(sp[spi:], ".")
-		}
-	}
+	pkgs := d.FindPackagesOfName(name)
 
 	if len(pkgs) == 0 {
 		return nil, nil
@@ -509,7 +511,7 @@ func (d *Dep) internalGetOptions(optionItem OptionItem, name string, filedep *Fi
 	}
 
 	// find the source type from descriptor.proto
-	srcTypeName := optionItem.StructName()
+	srcTypeName := optionItem.MessageName()
 
 	sourceType, err := d.GetType(srcTypeName)
 	if err != nil {
@@ -523,10 +525,12 @@ func (d *Dep) internalGetOptions(optionItem OptionItem, name string, filedep *Fi
 			if m.IsExtend && m.Name == srcTypeName {
 				include_file := false
 
+				var field_item fproto.FieldElementTag
+
 				if dn.Name != "" {
-					// checks if the message has the firt part of the name
-					fld, _ := m.FindFieldPartial(dn.Name)
-					if fld != nil {
+					// checks if the message has the first part of the name
+					field_item, _ = m.FindFieldPartial(dn.Name)
+					if field_item != nil {
 						include_file = true
 					}
 				} else {
@@ -535,10 +539,12 @@ func (d *Dep) internalGetOptions(optionItem OptionItem, name string, filedep *Fi
 
 				if include_file {
 					ret = append(ret, &OptionType{
+						OptionName:   name,
 						SourceOption: sourceType,
 						Option:       NewDepTypeFromElement(dn.FileDep, m),
 						OptionItem:   optionItem,
 						Name:         dn.Name,
+						FieldItem:    field_item,
 					})
 				}
 			}

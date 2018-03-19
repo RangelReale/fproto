@@ -29,6 +29,7 @@ type DepType struct {
 	Item fproto.FProtoElement
 }
 
+// Creates a new DepType
 func NewDepType(filedep *FileDep, alias string, originalAlias string, name string, item fproto.FProtoElement) *DepType {
 	return &DepType{
 		FileDep:       filedep,
@@ -39,6 +40,7 @@ func NewDepType(filedep *FileDep, alias string, originalAlias string, name strin
 	}
 }
 
+// Creates a new DepType for a scalar.
 func NewDepTypeScalar(scalarType fproto.ScalarType) *DepType {
 	return &DepType{
 		Name:       scalarType.ProtoType(),
@@ -168,6 +170,7 @@ func (d *DepType) GetTypes(name string) ([]*DepType, error) {
 	return d.FileDep.GetTypes(fmt.Sprintf("%s.%s", d.Name, name))
 }
 
+// Returns a list of extension packages for this type.
 func (d *DepType) ExtensionPackages() []string {
 	if d.FileDep != nil {
 		return d.FileDep.Dep.GetExtensions(d.FileDep, d.OriginalAlias, d.Name)
@@ -175,6 +178,29 @@ func (d *DepType) ExtensionPackages() []string {
 	return nil
 }
 
+// Returns a list of DepTypes for the extensions of this type.
+func (d *DepType) GetTypeExtensions() (map[string]*DepType, error) {
+	pkgs := d.ExtensionPackages()
+	if len(pkgs) == 0 {
+		return nil, nil
+	}
+
+	ret := make(map[string]*DepType)
+
+	for _, p := range pkgs {
+		edt, err := d.GetTypeExtension(p)
+		if err != nil {
+			return nil, err
+		}
+		if edt != nil {
+			ret[p] = edt
+		}
+	}
+
+	return ret, nil
+}
+
+// Returns a single Deptype for an extensions of this type named by a package.
 func (d *DepType) GetTypeExtension(extensionPkg string) (*DepType, error) {
 	if d.FileDep != nil {
 		return d.FileDep.Dep.GetTypeExtension(d.FullOriginalName(), extensionPkg)

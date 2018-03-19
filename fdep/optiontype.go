@@ -1,5 +1,7 @@
 package fdep
 
+import "github.com/RangelReale/fproto"
+
 type OptionItem int
 
 const (
@@ -12,7 +14,7 @@ const (
 	METHOD_OPTION
 )
 
-func (ot OptionItem) StructName() string {
+func (ot OptionItem) MessageName() string {
 	switch ot {
 	case FILE_OPTION:
 		return "google.protobuf.FileOptions"
@@ -33,6 +35,8 @@ func (ot OptionItem) StructName() string {
 }
 
 type OptionType struct {
+	// Requested option name
+	OptionName string
 	// Type of the root option
 	SourceOption *DepType
 	// Option can be nil if the type is one of the root option types
@@ -41,4 +45,6 @@ type OptionType struct {
 	OptionItem OptionItem
 	// Name of option after removing package name
 	Name string
+	// The proto field if available
+	FieldItem fproto.FieldElementTag
 }

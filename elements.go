@@ -148,7 +148,7 @@ func (f *MapFieldElement) FirstFieldTag() int {
 // a oneoff construct in a protobuf file. All the fields in a
 // oneof construct share memory, and at most one field can be
 // set at any time.
-type OneofFieldElement struct {
+type OneOfFieldElement struct {
 	Parent  FProtoElement
 	Name    string
 	Comment *Comment
@@ -156,11 +156,11 @@ type OneofFieldElement struct {
 	Fields  []FieldElementTag
 }
 
-func (f *OneofFieldElement) FieldName() string {
+func (f *OneOfFieldElement) FieldName() string {
 	return f.Name
 }
 
-func (f *OneofFieldElement) FirstFieldTag() int {
+func (f *OneOfFieldElement) FirstFieldTag() int {
 	smallest := -1
 	for _, fld := range f.Fields {
 		if smallest == -1 || fld.FirstFieldTag() < smallest {
@@ -240,7 +240,7 @@ func (e *RPCElement) FProtoElement()           {}
 func (e *ServiceElement) FProtoElement()       {}
 func (e *FieldElement) FProtoElement()         {}
 func (e *MapFieldElement) FProtoElement()      {}
-func (e *OneofFieldElement) FProtoElement()    {}
+func (e *OneOfFieldElement) FProtoElement()    {}
 func (e *ExtensionsElement) FProtoElement()    {}
 func (e *ReservedRangeElement) FProtoElement() {}
 func (e *MessageElement) FProtoElement()       {}
@@ -253,7 +253,7 @@ func (e *RPCElement) ParentElement() FProtoElement           { return e.Parent }
 func (e *ServiceElement) ParentElement() FProtoElement       { return e.Parent }
 func (e *FieldElement) ParentElement() FProtoElement         { return e.Parent }
 func (e *MapFieldElement) ParentElement() FProtoElement      { return e.Parent }
-func (e *OneofFieldElement) ParentElement() FProtoElement    { return e.Parent }
+func (e *OneOfFieldElement) ParentElement() FProtoElement    { return e.Parent }
 func (e *ExtensionsElement) ParentElement() FProtoElement    { return e.Parent }
 func (e *ReservedRangeElement) ParentElement() FProtoElement { return e.Parent }
 func (e *MessageElement) ParentElement() FProtoElement       { return e.Parent }
@@ -266,7 +266,7 @@ func (e *RPCElement) ElementName() string           { return e.Name }
 func (e *ServiceElement) ElementName() string       { return e.Name }
 func (e *FieldElement) ElementName() string         { return e.Name }
 func (e *MapFieldElement) ElementName() string      { return e.Name }
-func (e *OneofFieldElement) ElementName() string    { return e.Name }
+func (e *OneOfFieldElement) ElementName() string    { return e.Name }
 func (e *ExtensionsElement) ElementName() string    { return "" }
 func (e *ReservedRangeElement) ElementName() string { return "" }
 func (e *MessageElement) ElementName() string       { return e.Name }
@@ -279,7 +279,7 @@ func (e *RPCElement) ElementTypeName() string           { return "RPC" }
 func (e *ServiceElement) ElementTypeName() string       { return "SERVICE" }
 func (e *FieldElement) ElementTypeName() string         { return "FIELD" }
 func (e *MapFieldElement) ElementTypeName() string      { return "MAP FIELD" }
-func (e *OneofFieldElement) ElementTypeName() string    { return "ONEOF FIELD" }
+func (e *OneOfFieldElement) ElementTypeName() string    { return "ONEOF FIELD" }
 func (e *ExtensionsElement) ElementTypeName() string    { return "EXTENSION" }
 func (e *ReservedRangeElement) ElementTypeName() string { return "RESERVED RANGE" }
 func (e *MessageElement) ElementTypeName() string       { return "MESSAGE" }

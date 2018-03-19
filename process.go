@@ -347,7 +347,7 @@ func (f *MapFieldElement) FindOption(name string) *OptionElement {
 // PROCESS: OneOfElement
 //
 
-func (f *OneofFieldElement) FindOption(name string) *OptionElement {
+func (f *OneOfFieldElement) FindOption(name string) *OptionElement {
 	for _, o := range f.Options {
 		if o.Name == name || o.ParenthesizedName == name {
 			return o

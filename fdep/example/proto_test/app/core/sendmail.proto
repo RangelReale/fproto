@@ -5,6 +5,7 @@ import "fproto-wrap/uuid.proto";
 import "fproto-wrap/time.proto";
 import "fproto-wrap/jsontag.proto";
 import "fproto-wrap-headers/headers.proto";
+import "fproto-wrap-validate/validate.proto";
 import "google/protobuf/empty.proto";
 
 //
@@ -75,7 +76,7 @@ message SendMail {
     // "BCC" destinations
     repeated SendMailDestination destination_bcc = 12;
     // Subject
-    string subject = 13;
+    string subject = 13 [(validate.field) = {string_not_empty: true}];
 
     message Body {
         // Body in text format (optional)

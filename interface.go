@@ -128,11 +128,11 @@ func (el *MapFieldElement) addOptionElement(e *OptionElement) {
 // OneOfElement
 //
 
-func (el *OneofFieldElement) addOptionElement(e *OptionElement) {
+func (el *OneOfFieldElement) addOptionElement(e *OptionElement) {
 	el.Options = append(el.Options, e)
 }
 
-func (el *OneofFieldElement) addField(e FieldElementTag) {
+func (el *OneOfFieldElement) addField(e FieldElementTag) {
 	el.Fields = append(el.Fields, e)
 }
 

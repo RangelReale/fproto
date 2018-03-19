@@ -46,6 +46,10 @@ func main() {
 	printFieldTypes(pdep, "app.core.SendMailAttach")
 
 	printFieldTypes(pdep, "fproto_wrap_headers.Headers")
+
+	printMessageExtensions(pdep, fdep.FIELD_OPTION.MessageName())
+
+	printOptionType(pdep)
 }
 
 func printFiles(pdep *fdep.Dep) {
@@ -135,7 +139,7 @@ func printFields(pdep *fdep.Dep) {
 			fmt.Printf("* FIELD: %s - TYPE: %s\n", xfld.Name, xfld.Type)
 		case *fproto.MapFieldElement:
 			fmt.Printf("* FIELD: %s - TYPE: map<%s, %s>\n", xfld.Name, xfld.KeyType, xfld.Type)
-		case *fproto.OneofFieldElement:
+		case *fproto.OneOfFieldElement:
 			fmt.Printf("* FIELD: %s - TYPE: oneof\n", xfld.Name)
 		}
 	}
@@ -156,32 +160,98 @@ func printFieldTypes(pdep *fdep.Dep, typeName string) {
 
 	fmt.Printf("Message type name: %s\n", tp_print.FullOriginalName())
 
-	print_type := func(desc string, typeName string) {
-		tp_fld, err := tp_print.MustGetType(typeName)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if tp_fld.IsScalar() {
-			fmt.Printf("\t%sTYPE: SCALAR %s\n", desc, tp_fld.ScalarType.ProtoType())
-		} else {
-			fmt.Printf("\t%sTYPE: %s [%s] - from file: %s\n", desc, tp_fld.FullOriginalName(), tp_fld.Item.ElementTypeName(), tp_fld.FileDep.FilePath)
-		}
-	}
-
 	for _, fld := range message_element.Fields {
 		switch xfld := fld.(type) {
 		case *fproto.FieldElement:
 			fmt.Printf("* FIELD: %s - TYPE: %s\n", xfld.Name, xfld.Type)
-			print_type("", xfld.Type)
+			Util_PrintType("", tp_print, xfld.Type)
 		case *fproto.MapFieldElement:
 			fmt.Printf("* FIELD: %s - TYPE: map<%s, %s>\n", xfld.Name, xfld.KeyType, xfld.Type)
-			print_type("KEY ", xfld.KeyType)
-			print_type("", xfld.Type)
-		case *fproto.OneofFieldElement:
+			Util_PrintType("KEY ", tp_print, xfld.KeyType)
+			Util_PrintType("", tp_print, xfld.Type)
+		case *fproto.OneOfFieldElement:
 			fmt.Printf("* FIELD: %s - TYPE: oneof\n", xfld.Name)
 			for _, oofld := range xfld.Fields {
 				fmt.Printf("\tONEOF FIELD: %s\n", oofld.FieldName())
 			}
 		}
+	}
+}
+
+func printMessageExtensions(pdep *fdep.Dep, typeName string) {
+	fmt.Printf("%s PRINT MESSAGE EXTENSIONS: %s %s\n", lines, typeName, lines)
+
+	tp_print, err := pdep.GetType(typeName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	extensions, err := tp_print.GetTypeExtensions()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Message type name: %s\n", tp_print.FullOriginalName())
+
+	for extpkg, extType := range extensions {
+		fmt.Printf("* EXTENSION: %s [package: %s] [proto path: %s]\n", extType.FullOriginalName(), extpkg, extType.FileDep.FilePath)
+		if em, emok := extType.Item.(*fproto.MessageElement); emok {
+			for _, emf := range em.Fields {
+				switch xfld := emf.(type) {
+				case *fproto.FieldElement:
+					fmt.Printf("\tFIELD: %s [type: %s]\n", xfld.Name, xfld.Type)
+				case *fproto.MapFieldElement:
+					fmt.Printf("\tMAP FIELD: %s [type: map<%s, %s>]\n", xfld.Name, xfld.KeyType, xfld.Type)
+				case *fproto.OneOfFieldElement:
+					fmt.Printf("\tFIELD: %s [type: oneof]\n", xfld.Name)
+				}
+			}
+		}
+	}
+}
+
+func printOptionType(pdep *fdep.Dep) {
+	fmt.Printf("%s PRINT OPTION TYPE %s\n", lines, lines)
+
+	o, err := pdep.GetOption(fdep.FIELD_OPTION, "validate.field")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("OPTION: %s\n", o.OptionName)
+
+	fmt.Printf("Source option type: %s\n", o.SourceOption.FullOriginalName())
+	if o.Option != nil {
+		fmt.Printf("Option type: %s\n", o.Option.FullOriginalName())
+	}
+	if o.Name != "" {
+		fmt.Printf("Option name: %s\n", o.Name)
+	}
+	if o.FieldItem != nil {
+		parent_dt := pdep.DepTypeFromElement(o.FieldItem.ParentElement())
+
+		switch xfld := o.FieldItem.(type) {
+		case *fproto.FieldElement:
+			fmt.Printf("Field item fieldname: %s [type: %s]\n", xfld.Name, xfld.Type)
+			Util_PrintType("", parent_dt, xfld.Type)
+		case *fproto.MapFieldElement:
+			fmt.Printf("Field item fieldname: %s [type: map<%s, %s>]\n", xfld.Name, xfld.KeyType, xfld.Type)
+			Util_PrintType("KEY ", parent_dt, xfld.KeyType)
+			Util_PrintType("", parent_dt, xfld.Type)
+		case *fproto.OneOfFieldElement:
+			fmt.Printf("Field item fieldname: %s [type: oneof]\n", xfld.Name)
+		}
+	}
+}
+
+func Util_PrintType(desc string, parent *fdep.DepType, typeName string) {
+	tp_fld, err := parent.MustGetType(typeName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if tp_fld.IsScalar() {
+		fmt.Printf("\t%sTYPE: SCALAR %s\n", desc, tp_fld.ScalarType.ProtoType())
+	} else {
+		fmt.Printf("\t%sTYPE: %s [%s] - from file: %s\n", desc, tp_fld.FullOriginalName(), tp_fld.Item.ElementTypeName(), tp_fld.FileDep.FilePath)
 	}
 }
