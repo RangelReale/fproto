@@ -75,6 +75,40 @@ func (d *DepType) IsSame(od *DepType) bool {
 	return true
 }
 
+// Returns the parent deptype, or nil if root
+func (d *DepType) Parent() *DepType {
+	if d.Item != nil && d.Item.ParentElement() != nil {
+		return NewDepTypeFromElement(d.FileDep, d.Item.ParentElement())
+	}
+	return nil
+}
+
+// Returns up to the n-th parent if possible, excluding the ProtFile.
+// The second return value is the amount found.
+func (d *DepType) SkipParents(n int) (*DepType, int) {
+	cur := d.Item
+	ct := 0
+	for n > 0 {
+		if cur != nil && cur.ParentElement() != nil {
+			if _, ispfile := cur.ParentElement().(*fproto.ProtoFile); !ispfile {
+				cur = cur.ParentElement()
+				ct++
+				n--
+			} else {
+				break
+			}
+		} else {
+			break
+		}
+	}
+
+	if cur == nil {
+		return nil, 0
+	}
+
+	return NewDepTypeFromElement(d.FileDep, cur), ct
+}
+
 // Returns the name plus alias, if available
 func (d *DepType) FullName() string {
 	if d.Alias != "" {
