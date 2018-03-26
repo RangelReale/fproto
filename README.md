@@ -8,8 +8,6 @@ See elements.go to see the structs definitions.
 
 Uses [https://github.com/emicklei/proto](https://github.com/emicklei/proto) for parsing.
 
-The subpackage "fdep" uses this to build relationships between proto files and extracting types, helping creating source code generators.
-
 ### install
 
     go get -u -v github.com/RangelReale/fproto
@@ -41,6 +39,9 @@ The subpackage "fdep" uses this to build relationships between proto files and e
 	}
 	
 ### related
+ 
+ * [https://github.com/RangelReale/fdep](https://github.com/RangelReale/fdep) Package for building relationships between 
+ proto files and extracting types, helping creating source code generators.
 
  * [https://github.com/RangelReale/fproto-wrap](https://github.com/RangelReale/fproto-wrap)
     Generates easier-to-use wrappers for the standard protobuf generated files.
