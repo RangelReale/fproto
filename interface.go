@@ -186,6 +186,8 @@ func (el *ProtoFile) addDependency(e string) {
 
 func (el *ProtoFile) addPublicDependency(e string) {
 	el.PublicDependencies = append(el.PublicDependencies, e)
+	// also add as normal dependency
+	el.addDependency(e)
 }
 
 func (el *ProtoFile) addWeakDependency(e string) {

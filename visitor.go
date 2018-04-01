@@ -154,12 +154,14 @@ func (v *visitor) VisitOption(o *proto.Option) {
 	if el, ok := v.scope.(iAddOption); ok {
 		oname := o.Name
 		parenthesizedName := o.Name
+		npname := ""
 		ispar := false
 
 		if strings.HasPrefix(oname, "(") {
 			pparse := strings.Split(oname, ")")
 
 			parenthesizedName = pparse[0][1:]
+			npname = strings.TrimPrefix(pparse[1], ".")
 			oname = parenthesizedName + strings.Join(pparse[1:], ")") // keeps more parenthesis if available
 			ispar = true
 		}
@@ -169,6 +171,7 @@ func (v *visitor) VisitOption(o *proto.Option) {
 			Name:              oname,
 			Value:             Literal{o.Constant.Source, o.Constant.IsString},
 			ParenthesizedName: parenthesizedName,
+			NPName:            npname,
 			IsParenthesized:   ispar,
 			Comment:           v.copyComment(o.Comment),
 		}
@@ -179,9 +182,17 @@ func (v *visitor) VisitOption(o *proto.Option) {
 			}
 		}
 
+		// If parenthesized and has npname, add it as aggregated constant
+		if ispar && npname != "" {
+			if newel.AggregatedValues == nil {
+				newel.AggregatedValues = make(map[string]Literal)
+			}
+			newel.AggregatedValues[npname] = newel.Value
+		}
+
 		el.addOptionElement(newel)
 	} else {
-		v.errInvalidScope("public dependency", o.Name)
+		v.errInvalidScope("option", o.Name)
 	}
 
 }
