@@ -205,6 +205,7 @@ type MessageElement struct {
 	Fields         []FieldElementTag
 	Enums          []*EnumElement
 	Messages       []*MessageElement
+	ExtendMessages []*MessageElement
 	Extensions     []*ExtensionsElement
 	ReservedRanges []*ReservedRangeElement
 	ReservedNames  []string
@@ -228,6 +229,7 @@ type ProtoFile struct {
 	Options            []*OptionElement
 	Enums              []*EnumElement
 	Messages           []*MessageElement
+	ExtendMessages     []*MessageElement
 	Services           []*ServiceElement
 }
 

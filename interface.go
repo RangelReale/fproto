@@ -56,6 +56,10 @@ type iAddMessage interface {
 	addMessageElement(e *MessageElement)
 }
 
+type iAddExtendMessage interface {
+	addExtendMessageElement(e *MessageElement)
+}
+
 type iAddDependency interface {
 	addDependency(e string)
 }
@@ -156,6 +160,10 @@ func (el *MessageElement) addMessageElement(e *MessageElement) {
 	el.Messages = append(el.Messages, e)
 }
 
+func (el *MessageElement) addExtendMessageElement(e *MessageElement) {
+	el.ExtendMessages = append(el.ExtendMessages, e)
+}
+
 func (el *MessageElement) addExtensionsElement(e *ExtensionsElement) {
 	el.Extensions = append(el.Extensions, e)
 }
@@ -194,6 +202,10 @@ func (el *ProtoFile) addEnumElement(e *EnumElement) {
 
 func (el *ProtoFile) addMessageElement(e *MessageElement) {
 	el.Messages = append(el.Messages, e)
+}
+
+func (el *ProtoFile) addExtendMessageElement(e *MessageElement) {
+	el.ExtendMessages = append(el.ExtendMessages, e)
 }
 
 func (el *ProtoFile) addServiceElement(e *ServiceElement) {

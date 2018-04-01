@@ -91,10 +91,14 @@ func (f *ProtoFile) FindName(name string) []FProtoElement {
 	}
 
 	// items that can nest
-	for _, el := range f.Messages {
-		if el.IsExtend && el.Name == name {
+	for _, el := range f.ExtendMessages {
+		if el.Name == name {
 			ret = append(ret, el)
-		} else if el.Name == nfirst {
+		}
+	}
+
+	for _, el := range f.Messages {
+		if el.Name == nfirst {
 			if nrest != "" {
 				elr := el.FindName(nrest)
 				if len(elr) > 0 {
@@ -139,6 +143,21 @@ func (f *ProtoFile) CollectMessages() []FProtoElement {
 	for _, el := range f.Messages {
 		ret = append(ret, el)
 		ret = append(ret, el.CollectMessages()...)
+	}
+
+	return ret
+}
+
+func (f *ProtoFile) CollectExtendMessages() []FProtoElement {
+	var ret []FProtoElement
+
+	for _, el := range f.ExtendMessages {
+		ret = append(ret, el)
+		ret = append(ret, el.CollectExtendMessages()...)
+	}
+
+	for _, el := range f.Messages {
+		ret = append(ret, el.CollectExtendMessages()...)
 	}
 
 	return ret
@@ -258,6 +277,21 @@ func (f *MessageElement) CollectMessages() []FProtoElement {
 	for _, el := range f.Messages {
 		ret = append(ret, el)
 		ret = append(ret, el.CollectMessages()...)
+	}
+
+	return ret
+}
+
+func (f *MessageElement) CollectExtendMessages() []FProtoElement {
+	var ret []FProtoElement
+
+	for _, el := range f.ExtendMessages {
+		ret = append(ret, el)
+		ret = append(ret, el.CollectExtendMessages()...)
+	}
+
+	for _, el := range f.Messages {
+		ret = append(ret, el.CollectExtendMessages()...)
 	}
 
 	return ret

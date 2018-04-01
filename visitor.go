@@ -83,10 +83,18 @@ func (v *visitor) VisitMessage(m *proto.Message) {
 	}
 
 	// add to scope
-	if e, ok := v.scope.(iAddMessage); ok {
-		e.addMessageElement(newm)
+	if !newm.IsExtend {
+		if e, ok := v.scope.(iAddMessage); ok {
+			e.addMessageElement(newm)
+		} else {
+			v.errInvalidScope("message", m.Name)
+		}
 	} else {
-		v.errInvalidScope("message", m.Name)
+		if e, ok := v.scope.(iAddExtendMessage); ok {
+			e.addExtendMessageElement(newm)
+		} else {
+			v.errInvalidScope("extend message", m.Name)
+		}
 	}
 }
 
