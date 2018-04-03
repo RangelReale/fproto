@@ -1,6 +1,7 @@
 package fproto
 
 import (
+	"sort"
 	"strings"
 )
 
@@ -326,6 +327,15 @@ func (f *OptionElement) FindOption(name string) *OptionElement {
 		return f
 	}
 	return nil
+}
+
+func (f *OptionElement) AggregatedSorted() []string {
+	var keys []string
+	for k, _ := range f.AggregatedValues {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 //
