@@ -58,6 +58,33 @@ func (v *visitor) copyComment(c *proto.Comment) *Comment {
 	}
 }
 
+func (v *visitor) copyLiteral(c *proto.Literal) *Literal {
+	if c == nil {
+		return nil
+	}
+	ret := &Literal{
+		Source:   c.Source,
+		IsString: c.IsString,
+	}
+	if c.Array != nil {
+		ret.Array = v.copyLiteralList(c.Array)
+	}
+	return ret
+}
+
+func (v *visitor) copyLiteralList(c []*proto.Literal) []*Literal {
+	if c == nil {
+		return nil
+	}
+
+	ret := make([]*Literal, 0)
+	for _, ai := range c {
+		ret = append(ret, v.copyLiteral(ai))
+	}
+
+	return ret
+}
+
 func (v *visitor) VisitMessage(m *proto.Message) {
 	if v.err != nil {
 		return
@@ -169,23 +196,23 @@ func (v *visitor) VisitOption(o *proto.Option) {
 		newel := &OptionElement{
 			Parent:            v.scope,
 			Name:              oname,
-			Value:             Literal{o.Constant.Source, o.Constant.IsString},
+			Value:             v.copyLiteral(&o.Constant),
 			ParenthesizedName: parenthesizedName,
 			NPName:            npname,
 			IsParenthesized:   ispar,
 			Comment:           v.copyComment(o.Comment),
 		}
 		if o.AggregatedConstants != nil && len(o.AggregatedConstants) > 0 {
-			newel.AggregatedValues = make(map[string]Literal)
+			newel.AggregatedValues = make(map[string]*Literal)
 			for _, ac := range o.AggregatedConstants {
-				newel.AggregatedValues[ac.Name] = Literal{ac.Source, ac.IsString}
+				newel.AggregatedValues[ac.Name] = v.copyLiteral(ac.Literal)
 			}
 		}
 
 		// If parenthesized and has npname, add it as aggregated constant
 		if ispar && npname != "" {
 			if newel.AggregatedValues == nil {
-				newel.AggregatedValues = make(map[string]Literal)
+				newel.AggregatedValues = make(map[string]*Literal)
 			}
 			newel.AggregatedValues[npname] = newel.Value
 		}

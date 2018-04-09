@@ -14,6 +14,8 @@ type Comment struct {
 type Literal struct {
 	Source   string
 	IsString bool
+	// literal value can be an array literal value (even nested)
+	Array []*Literal
 }
 
 // SourceRepresentation returns the source (if quoted then use double quote).
@@ -43,8 +45,8 @@ type OptionElement struct {
 	ParenthesizedName string
 	NPName            string // non-parenthesized name
 	IsParenthesized   bool
-	Value             Literal
-	AggregatedValues  map[string]Literal
+	Value             *Literal
+	AggregatedValues  map[string]*Literal
 	Comment           *Comment
 }
 
