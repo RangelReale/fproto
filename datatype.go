@@ -77,6 +77,49 @@ func (s ScalarType) GoType() string {
 	return scalarGoTypeLookupMap[s]
 }
 
+func (s ScalarType) IsInt() bool {
+	for _, iv := range []ScalarType{
+		Fixed32Scalar,
+		Fixed64Scalar,
+		Int32Scalar,
+		Int64Scalar,
+		Sfixed32Scalar,
+		Sfixed64Scalar,
+		Sint32Scalar,
+		Sint64Scalar,
+		Uint32Scalar,
+		Uint64Scalar,
+	} {
+		if iv == s {
+			return true
+		}
+	}
+	return false
+}
+
+func (s ScalarType) IsFloat() bool {
+	for _, iv := range []ScalarType{
+		DoubleScalar,
+		FloatScalar,
+	} {
+		if iv == s {
+			return true
+		}
+	}
+	return false
+}
+
+func (s ScalarType) IsString() bool {
+	for _, iv := range []ScalarType{
+		StringScalar,
+	} {
+		if iv == s {
+			return true
+		}
+	}
+	return false
+}
+
 // Parses the protobuf type into ScalarType. The bool parameters indicates if
 // the type is scalar or not
 func ParseScalarType(s string) (ScalarType, bool) {
